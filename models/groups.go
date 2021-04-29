@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -24,17 +23,17 @@ import (
 
 // Group is an object representing the database table.
 type Group struct {
-	ID          int64       `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Name        string      `boil:"name" json:"name" toml:"name" yaml:"name"`
-	Code        string      `boil:"code" json:"code" toml:"code" yaml:"code"`
-	Version     null.String `boil:"version" json:"version,omitempty" toml:"version" yaml:"version,omitempty"`
-	Lang        null.String `boil:"lang" json:"lang,omitempty" toml:"lang" yaml:"lang,omitempty"`
-	NamespaceID null.Int    `boil:"namespace_id" json:"namespace_id,omitempty" toml:"namespace_id" yaml:"namespace_id,omitempty"`
-	ServiceID   int         `boil:"service_id" json:"service_id" toml:"service_id" yaml:"service_id"`
-	ClusterID   int         `boil:"cluster_id" json:"cluster_id" toml:"cluster_id" yaml:"cluster_id"`
-	Replicas    null.Int    `boil:"replicas" json:"replicas,omitempty" toml:"replicas" yaml:"replicas,omitempty"`
-	DeployType  null.Int    `boil:"deploy_type" json:"deploy_type,omitempty" toml:"deploy_type" yaml:"deploy_type,omitempty"`
-	Note        null.String `boil:"note" json:"note,omitempty" toml:"note" yaml:"note,omitempty"`
+	ID          int64  `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Name        string `boil:"name" json:"name" toml:"name" yaml:"name"`
+	Code        string `boil:"code" json:"code" toml:"code" yaml:"code"`
+	Version     string `boil:"version" json:"version" toml:"version" yaml:"version"`
+	Lang        string `boil:"lang" json:"lang" toml:"lang" yaml:"lang"`
+	NamespaceID int    `boil:"namespace_id" json:"namespace_id" toml:"namespace_id" yaml:"namespace_id"`
+	ServiceID   int    `boil:"service_id" json:"service_id" toml:"service_id" yaml:"service_id"`
+	ClusterID   int    `boil:"cluster_id" json:"cluster_id" toml:"cluster_id" yaml:"cluster_id"`
+	Replicas    int    `boil:"replicas" json:"replicas" toml:"replicas" yaml:"replicas"`
+	DeployType  int    `boil:"deploy_type" json:"deploy_type" toml:"deploy_type" yaml:"deploy_type"`
+	Note        string `boil:"note" json:"note" toml:"note" yaml:"note"`
 
 	R *groupR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L groupL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -68,29 +67,6 @@ var GroupColumns = struct {
 
 // Generated where
 
-type whereHelpernull_Int struct{ field string }
-
-func (w whereHelpernull_Int) EQ(x null.Int) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_Int) NEQ(x null.Int) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_Int) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_Int) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-func (w whereHelpernull_Int) LT(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_Int) LTE(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_Int) GT(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_Int) GTE(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
 type whereHelperint struct{ field string }
 
 func (w whereHelperint) EQ(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
@@ -118,26 +94,26 @@ var GroupWhere = struct {
 	ID          whereHelperint64
 	Name        whereHelperstring
 	Code        whereHelperstring
-	Version     whereHelpernull_String
-	Lang        whereHelpernull_String
-	NamespaceID whereHelpernull_Int
+	Version     whereHelperstring
+	Lang        whereHelperstring
+	NamespaceID whereHelperint
 	ServiceID   whereHelperint
 	ClusterID   whereHelperint
-	Replicas    whereHelpernull_Int
-	DeployType  whereHelpernull_Int
-	Note        whereHelpernull_String
+	Replicas    whereHelperint
+	DeployType  whereHelperint
+	Note        whereHelperstring
 }{
 	ID:          whereHelperint64{field: "\"groups\".\"id\""},
 	Name:        whereHelperstring{field: "\"groups\".\"name\""},
 	Code:        whereHelperstring{field: "\"groups\".\"code\""},
-	Version:     whereHelpernull_String{field: "\"groups\".\"version\""},
-	Lang:        whereHelpernull_String{field: "\"groups\".\"lang\""},
-	NamespaceID: whereHelpernull_Int{field: "\"groups\".\"namespace_id\""},
+	Version:     whereHelperstring{field: "\"groups\".\"version\""},
+	Lang:        whereHelperstring{field: "\"groups\".\"lang\""},
+	NamespaceID: whereHelperint{field: "\"groups\".\"namespace_id\""},
 	ServiceID:   whereHelperint{field: "\"groups\".\"service_id\""},
 	ClusterID:   whereHelperint{field: "\"groups\".\"cluster_id\""},
-	Replicas:    whereHelpernull_Int{field: "\"groups\".\"replicas\""},
-	DeployType:  whereHelpernull_Int{field: "\"groups\".\"deploy_type\""},
-	Note:        whereHelpernull_String{field: "\"groups\".\"note\""},
+	Replicas:    whereHelperint{field: "\"groups\".\"replicas\""},
+	DeployType:  whereHelperint{field: "\"groups\".\"deploy_type\""},
+	Note:        whereHelperstring{field: "\"groups\".\"note\""},
 }
 
 // GroupRels is where relationship names are stored.
@@ -158,8 +134,8 @@ type groupL struct{}
 
 var (
 	groupAllColumns            = []string{"id", "name", "code", "version", "lang", "namespace_id", "service_id", "cluster_id", "replicas", "deploy_type", "note"}
-	groupColumnsWithoutDefault = []string{"name", "code", "version", "lang", "namespace_id", "service_id", "cluster_id", "note"}
-	groupColumnsWithDefault    = []string{"id", "replicas", "deploy_type"}
+	groupColumnsWithoutDefault = []string{"name", "code", "namespace_id", "service_id", "cluster_id"}
+	groupColumnsWithDefault    = []string{"id", "version", "lang", "replicas", "deploy_type", "note"}
 	groupPrimaryKeyColumns     = []string{"id"}
 )
 

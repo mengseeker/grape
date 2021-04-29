@@ -4,11 +4,11 @@ class CreateService < ActiveRecord::Migration[6.1]
       t.string :name, null: false
       t.string :code, null: false
 
-      t.integer :port
-      t.integer :protocol
-      t.integer :external, default: 0
+      t.integer :port, null: false
+      t.integer :protocol, null: false
+      t.integer :external, null: false, default: 0
 
-      t.string :note
+      t.string :note, null: false, default: ""
 
       t.index :code, unique: true
     end

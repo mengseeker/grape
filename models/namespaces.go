@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -24,10 +23,10 @@ import (
 
 // Namespace is an object representing the database table.
 type Namespace struct {
-	ID   int64       `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Code string      `boil:"code" json:"code" toml:"code" yaml:"code"`
-	Name string      `boil:"name" json:"name" toml:"name" yaml:"name"`
-	Note null.String `boil:"note" json:"note,omitempty" toml:"note" yaml:"note,omitempty"`
+	ID   int64  `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Code string `boil:"code" json:"code" toml:"code" yaml:"code"`
+	Name string `boil:"name" json:"name" toml:"name" yaml:"name"`
+	Note string `boil:"note" json:"note" toml:"note" yaml:"note"`
 
 	R *namespaceR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L namespaceL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -51,12 +50,12 @@ var NamespaceWhere = struct {
 	ID   whereHelperint64
 	Code whereHelperstring
 	Name whereHelperstring
-	Note whereHelpernull_String
+	Note whereHelperstring
 }{
 	ID:   whereHelperint64{field: "\"namespaces\".\"id\""},
 	Code: whereHelperstring{field: "\"namespaces\".\"code\""},
 	Name: whereHelperstring{field: "\"namespaces\".\"name\""},
-	Note: whereHelpernull_String{field: "\"namespaces\".\"note\""},
+	Note: whereHelperstring{field: "\"namespaces\".\"note\""},
 }
 
 // NamespaceRels is where relationship names are stored.
@@ -77,8 +76,8 @@ type namespaceL struct{}
 
 var (
 	namespaceAllColumns            = []string{"id", "code", "name", "note"}
-	namespaceColumnsWithoutDefault = []string{"code", "name", "note"}
-	namespaceColumnsWithDefault    = []string{"id"}
+	namespaceColumnsWithoutDefault = []string{"code", "name"}
+	namespaceColumnsWithDefault    = []string{"id", "note"}
 	namespacePrimaryKeyColumns     = []string{"id"}
 )
 

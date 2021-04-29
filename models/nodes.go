@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -24,15 +23,15 @@ import (
 
 // Node is an object representing the database table.
 type Node struct {
-	ID          int64       `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Name        string      `boil:"name" json:"name" toml:"name" yaml:"name"`
-	Code        string      `boil:"code" json:"code" toml:"code" yaml:"code"`
-	NamespaceID int         `boil:"namespace_id" json:"namespace_id" toml:"namespace_id" yaml:"namespace_id"`
-	ServiceID   int         `boil:"service_id" json:"service_id" toml:"service_id" yaml:"service_id"`
-	ClusterID   int         `boil:"cluster_id" json:"cluster_id" toml:"cluster_id" yaml:"cluster_id"`
-	GroupID     int         `boil:"group_id" json:"group_id" toml:"group_id" yaml:"group_id"`
-	IP          string      `boil:"ip" json:"ip" toml:"ip" yaml:"ip"`
-	State       null.String `boil:"state" json:"state,omitempty" toml:"state" yaml:"state,omitempty"`
+	ID          int64  `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Name        string `boil:"name" json:"name" toml:"name" yaml:"name"`
+	Code        string `boil:"code" json:"code" toml:"code" yaml:"code"`
+	NamespaceID int    `boil:"namespace_id" json:"namespace_id" toml:"namespace_id" yaml:"namespace_id"`
+	ServiceID   int    `boil:"service_id" json:"service_id" toml:"service_id" yaml:"service_id"`
+	ClusterID   int    `boil:"cluster_id" json:"cluster_id" toml:"cluster_id" yaml:"cluster_id"`
+	GroupID     int    `boil:"group_id" json:"group_id" toml:"group_id" yaml:"group_id"`
+	IP          string `boil:"ip" json:"ip" toml:"ip" yaml:"ip"`
+	State       int    `boil:"state" json:"state" toml:"state" yaml:"state"`
 
 	R *nodeR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L nodeL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -71,7 +70,7 @@ var NodeWhere = struct {
 	ClusterID   whereHelperint
 	GroupID     whereHelperint
 	IP          whereHelperstring
-	State       whereHelpernull_String
+	State       whereHelperint
 }{
 	ID:          whereHelperint64{field: "\"nodes\".\"id\""},
 	Name:        whereHelperstring{field: "\"nodes\".\"name\""},
@@ -81,7 +80,7 @@ var NodeWhere = struct {
 	ClusterID:   whereHelperint{field: "\"nodes\".\"cluster_id\""},
 	GroupID:     whereHelperint{field: "\"nodes\".\"group_id\""},
 	IP:          whereHelperstring{field: "\"nodes\".\"ip\""},
-	State:       whereHelpernull_String{field: "\"nodes\".\"state\""},
+	State:       whereHelperint{field: "\"nodes\".\"state\""},
 }
 
 // NodeRels is where relationship names are stored.
@@ -102,8 +101,8 @@ type nodeL struct{}
 
 var (
 	nodeAllColumns            = []string{"id", "name", "code", "namespace_id", "service_id", "cluster_id", "group_id", "ip", "state"}
-	nodeColumnsWithoutDefault = []string{"name", "code", "namespace_id", "service_id", "cluster_id", "group_id", "ip", "state"}
-	nodeColumnsWithDefault    = []string{"id"}
+	nodeColumnsWithoutDefault = []string{"name", "code", "namespace_id", "service_id", "cluster_id", "group_id", "ip"}
+	nodeColumnsWithDefault    = []string{"id", "state"}
 	nodePrimaryKeyColumns     = []string{"id"}
 )
 

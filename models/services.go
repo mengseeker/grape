@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -24,13 +23,13 @@ import (
 
 // Service is an object representing the database table.
 type Service struct {
-	ID       int64       `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Name     string      `boil:"name" json:"name" toml:"name" yaml:"name"`
-	Code     string      `boil:"code" json:"code" toml:"code" yaml:"code"`
-	Port     null.Int    `boil:"port" json:"port,omitempty" toml:"port" yaml:"port,omitempty"`
-	Protocol null.Int    `boil:"protocol" json:"protocol,omitempty" toml:"protocol" yaml:"protocol,omitempty"`
-	External null.Int    `boil:"external" json:"external,omitempty" toml:"external" yaml:"external,omitempty"`
-	Note     null.String `boil:"note" json:"note,omitempty" toml:"note" yaml:"note,omitempty"`
+	ID       int64  `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Name     string `boil:"name" json:"name" toml:"name" yaml:"name"`
+	Code     string `boil:"code" json:"code" toml:"code" yaml:"code"`
+	Port     int    `boil:"port" json:"port" toml:"port" yaml:"port"`
+	Protocol int    `boil:"protocol" json:"protocol" toml:"protocol" yaml:"protocol"`
+	External int    `boil:"external" json:"external" toml:"external" yaml:"external"`
+	Note     string `boil:"note" json:"note" toml:"note" yaml:"note"`
 
 	R *serviceR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L serviceL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -60,18 +59,18 @@ var ServiceWhere = struct {
 	ID       whereHelperint64
 	Name     whereHelperstring
 	Code     whereHelperstring
-	Port     whereHelpernull_Int
-	Protocol whereHelpernull_Int
-	External whereHelpernull_Int
-	Note     whereHelpernull_String
+	Port     whereHelperint
+	Protocol whereHelperint
+	External whereHelperint
+	Note     whereHelperstring
 }{
 	ID:       whereHelperint64{field: "\"services\".\"id\""},
 	Name:     whereHelperstring{field: "\"services\".\"name\""},
 	Code:     whereHelperstring{field: "\"services\".\"code\""},
-	Port:     whereHelpernull_Int{field: "\"services\".\"port\""},
-	Protocol: whereHelpernull_Int{field: "\"services\".\"protocol\""},
-	External: whereHelpernull_Int{field: "\"services\".\"external\""},
-	Note:     whereHelpernull_String{field: "\"services\".\"note\""},
+	Port:     whereHelperint{field: "\"services\".\"port\""},
+	Protocol: whereHelperint{field: "\"services\".\"protocol\""},
+	External: whereHelperint{field: "\"services\".\"external\""},
+	Note:     whereHelperstring{field: "\"services\".\"note\""},
 }
 
 // ServiceRels is where relationship names are stored.
@@ -92,8 +91,8 @@ type serviceL struct{}
 
 var (
 	serviceAllColumns            = []string{"id", "name", "code", "port", "protocol", "external", "note"}
-	serviceColumnsWithoutDefault = []string{"name", "code", "port", "protocol", "note"}
-	serviceColumnsWithDefault    = []string{"id", "external"}
+	serviceColumnsWithoutDefault = []string{"name", "code", "port", "protocol"}
+	serviceColumnsWithDefault    = []string{"id", "external", "note"}
 	servicePrimaryKeyColumns     = []string{"id"}
 )
 

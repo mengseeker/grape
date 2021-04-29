@@ -18,22 +18,22 @@ ActiveRecord::Schema.define(version: 2021_04_29_094851) do
   create_table "clusters", force: :cascade do |t|
     t.string "name", null: false
     t.string "code", null: false
-    t.string "deploy_type"
-    t.string "note"
+    t.string "deploy_type", default: "k8s", null: false
+    t.string "note", default: "", null: false
     t.index ["code"], name: "index_clusters_on_code", unique: true
   end
 
   create_table "groups", force: :cascade do |t|
     t.string "name", null: false
     t.string "code", null: false
-    t.string "version"
-    t.string "lang"
-    t.integer "namespace_id"
+    t.string "version", default: "", null: false
+    t.string "lang", default: "", null: false
+    t.integer "namespace_id", null: false
     t.integer "service_id", null: false
     t.integer "cluster_id", null: false
-    t.integer "replicas", default: 0
-    t.integer "deploy_type", default: 0
-    t.string "note"
+    t.integer "replicas", default: 0, null: false
+    t.integer "deploy_type", default: 0, null: false
+    t.string "note", default: "", null: false
     t.index ["cluster_id"], name: "index_groups_on_cluster_id"
     t.index ["code"], name: "index_groups_on_code", unique: true
     t.index ["namespace_id"], name: "index_groups_on_namespace_id"
@@ -47,7 +47,7 @@ ActiveRecord::Schema.define(version: 2021_04_29_094851) do
   create_table "namespaces", force: :cascade do |t|
     t.string "code", null: false
     t.string "name", null: false
-    t.string "note"
+    t.string "note", default: "", null: false
     t.index ["code"], name: "index_namespaces_on_code", unique: true
   end
 
@@ -59,7 +59,7 @@ ActiveRecord::Schema.define(version: 2021_04_29_094851) do
     t.integer "cluster_id", null: false
     t.integer "group_id", null: false
     t.string "ip", null: false
-    t.string "state"
+    t.integer "state", default: 0, null: false
     t.index ["cluster_id"], name: "index_nodes_on_cluster_id"
     t.index ["code"], name: "index_nodes_on_code", unique: true
     t.index ["group_id"], name: "index_nodes_on_group_id"
@@ -70,10 +70,10 @@ ActiveRecord::Schema.define(version: 2021_04_29_094851) do
   create_table "services", force: :cascade do |t|
     t.string "name", null: false
     t.string "code", null: false
-    t.integer "port"
-    t.integer "protocol"
-    t.integer "external", default: 0
-    t.string "note"
+    t.integer "port", null: false
+    t.integer "protocol", null: false
+    t.integer "external", default: 0, null: false
+    t.string "note", default: "", null: false
     t.index ["code"], name: "index_services_on_code", unique: true
   end
 

@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -24,11 +23,11 @@ import (
 
 // Cluster is an object representing the database table.
 type Cluster struct {
-	ID         int64       `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Name       string      `boil:"name" json:"name" toml:"name" yaml:"name"`
-	Code       string      `boil:"code" json:"code" toml:"code" yaml:"code"`
-	DeployType null.String `boil:"deploy_type" json:"deploy_type,omitempty" toml:"deploy_type" yaml:"deploy_type,omitempty"`
-	Note       null.String `boil:"note" json:"note,omitempty" toml:"note" yaml:"note,omitempty"`
+	ID         int64  `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Name       string `boil:"name" json:"name" toml:"name" yaml:"name"`
+	Code       string `boil:"code" json:"code" toml:"code" yaml:"code"`
+	DeployType string `boil:"deploy_type" json:"deploy_type" toml:"deploy_type" yaml:"deploy_type"`
+	Note       string `boil:"note" json:"note" toml:"note" yaml:"note"`
 
 	R *clusterR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L clusterL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -96,41 +95,18 @@ func (w whereHelperstring) NIN(slice []string) qm.QueryMod {
 	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
 }
 
-type whereHelpernull_String struct{ field string }
-
-func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
 var ClusterWhere = struct {
 	ID         whereHelperint64
 	Name       whereHelperstring
 	Code       whereHelperstring
-	DeployType whereHelpernull_String
-	Note       whereHelpernull_String
+	DeployType whereHelperstring
+	Note       whereHelperstring
 }{
 	ID:         whereHelperint64{field: "\"clusters\".\"id\""},
 	Name:       whereHelperstring{field: "\"clusters\".\"name\""},
 	Code:       whereHelperstring{field: "\"clusters\".\"code\""},
-	DeployType: whereHelpernull_String{field: "\"clusters\".\"deploy_type\""},
-	Note:       whereHelpernull_String{field: "\"clusters\".\"note\""},
+	DeployType: whereHelperstring{field: "\"clusters\".\"deploy_type\""},
+	Note:       whereHelperstring{field: "\"clusters\".\"note\""},
 }
 
 // ClusterRels is where relationship names are stored.
@@ -151,8 +127,8 @@ type clusterL struct{}
 
 var (
 	clusterAllColumns            = []string{"id", "name", "code", "deploy_type", "note"}
-	clusterColumnsWithoutDefault = []string{"name", "code", "deploy_type", "note"}
-	clusterColumnsWithDefault    = []string{"id"}
+	clusterColumnsWithoutDefault = []string{"name", "code"}
+	clusterColumnsWithDefault    = []string{"id", "deploy_type", "note"}
 	clusterPrimaryKeyColumns     = []string{"id"}
 )
 

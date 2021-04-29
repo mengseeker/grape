@@ -9,7 +9,7 @@ class CreateNode < ActiveRecord::Migration[6.1]
       t.integer :group_id, null: false
 
       t.string :ip, null: false
-      t.string :state
+      t.integer :state, null: false, default: 0
 
       t.index :code, unique: true
       t.index :namespace_id
