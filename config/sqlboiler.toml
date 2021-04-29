@@ -1,0 +1,13 @@
+pkgname  = "models"
+output   = "models"
+wipe     = true
+no-tests = true
+debug    = true
+
+[psql]
+  dbname = "grape"
+  host = "localhost"
+  port = 5432
+  user = "grape"
+  pass = "grape"
+  blacklist = ["ar_internal_metadata", "migrations"]
