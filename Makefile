@@ -15,3 +15,4 @@ migrateredo:
 
 generate_models:
 	sqlboiler -c config/sqlboiler.toml psql
+	go generate models/services_helper.go

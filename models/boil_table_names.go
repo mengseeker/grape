@@ -4,17 +4,15 @@
 package models
 
 var TableNames = struct {
-	Clusters         string
-	Groups           string
-	Namespaces       string
-	Nodes            string
-	SchemaMigrations string
-	Services         string
+	Clusters   string
+	Groups     string
+	Namespaces string
+	Nodes      string
+	Services   string
 }{
-	Clusters:         "clusters",
-	Groups:           "groups",
-	Namespaces:       "namespaces",
-	Nodes:            "nodes",
-	SchemaMigrations: "schema_migrations",
-	Services:         "services",
+	Clusters:   "clusters",
+	Groups:     "groups",
+	Namespaces: "namespaces",
+	Nodes:      "nodes",
+	Services:   "services",
 }

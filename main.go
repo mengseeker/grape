@@ -1,9 +1,8 @@
 package main
 
 import (
-	"grape-pilot/cmd"
+	_ "grape/models"
 )
 
 func main() {
-	cmd.Execute()
 }

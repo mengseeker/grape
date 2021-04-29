@@ -1,6 +1,6 @@
 pkgname  = "models"
 output   = "models"
-wipe     = true
+wipe     = false
 no-tests = true
 debug    = true
 
@@ -10,4 +10,4 @@ debug    = true
   port = 5432
   user = "grape"
   pass = "grape"
-  blacklist = ["ar_internal_metadata", "migrations"]
+  blacklist = ["ar_internal_metadata", "migrations", "schema_migrations"]
