@@ -7,6 +7,7 @@ require (
 	github.com/gin-gonic/gin v1.7.1
 	github.com/gofrs/uuid v3.2.0+incompatible
 	github.com/gomodule/redigo v1.8.4
+	github.com/lib/pq v1.10.1
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/viper v1.6.3
 	github.com/volatiletech/sqlboiler v3.7.1+incompatible

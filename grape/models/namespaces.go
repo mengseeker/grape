@@ -284,6 +284,31 @@ func AddNamespaceHook(hookPoint boil.HookPoint, namespaceHook NamespaceHook) {
 	}
 }
 
+// OneG returns a single namespace record from the query using the global executor.
+func (q namespaceQuery) OneG(ctx context.Context) (*Namespace, error) {
+	return q.One(ctx, boil.GetContextDB())
+}
+
+// OneGP returns a single namespace record from the query using the global executor, and panics on error.
+func (q namespaceQuery) OneGP(ctx context.Context) *Namespace {
+	o, err := q.One(ctx, boil.GetContextDB())
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return o
+}
+
+// OneP returns a single namespace record from the query, and panics on error.
+func (q namespaceQuery) OneP(ctx context.Context, exec boil.ContextExecutor) *Namespace {
+	o, err := q.One(ctx, exec)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return o
+}
+
 // One returns a single namespace record from the query.
 func (q namespaceQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Namespace, error) {
 	o := &Namespace{}
@@ -303,6 +328,31 @@ func (q namespaceQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Na
 	}
 
 	return o, nil
+}
+
+// AllG returns all Namespace records from the query using the global executor.
+func (q namespaceQuery) AllG(ctx context.Context) (NamespaceSlice, error) {
+	return q.All(ctx, boil.GetContextDB())
+}
+
+// AllGP returns all Namespace records from the query using the global executor, and panics on error.
+func (q namespaceQuery) AllGP(ctx context.Context) NamespaceSlice {
+	o, err := q.All(ctx, boil.GetContextDB())
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return o
+}
+
+// AllP returns all Namespace records from the query, and panics on error.
+func (q namespaceQuery) AllP(ctx context.Context, exec boil.ContextExecutor) NamespaceSlice {
+	o, err := q.All(ctx, exec)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return o
 }
 
 // All returns all Namespace records from the query.
@@ -325,6 +375,31 @@ func (q namespaceQuery) All(ctx context.Context, exec boil.ContextExecutor) (Nam
 	return o, nil
 }
 
+// CountG returns the count of all Namespace records in the query, and panics on error.
+func (q namespaceQuery) CountG(ctx context.Context) (int64, error) {
+	return q.Count(ctx, boil.GetContextDB())
+}
+
+// CountGP returns the count of all Namespace records in the query using the global executor, and panics on error.
+func (q namespaceQuery) CountGP(ctx context.Context) int64 {
+	c, err := q.Count(ctx, boil.GetContextDB())
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return c
+}
+
+// CountP returns the count of all Namespace records in the query, and panics on error.
+func (q namespaceQuery) CountP(ctx context.Context, exec boil.ContextExecutor) int64 {
+	c, err := q.Count(ctx, exec)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return c
+}
+
 // Count returns the count of all Namespace records in the query.
 func (q namespaceQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	var count int64
@@ -338,6 +413,31 @@ func (q namespaceQuery) Count(ctx context.Context, exec boil.ContextExecutor) (i
 	}
 
 	return count, nil
+}
+
+// ExistsG checks if the row exists in the table, and panics on error.
+func (q namespaceQuery) ExistsG(ctx context.Context) (bool, error) {
+	return q.Exists(ctx, boil.GetContextDB())
+}
+
+// ExistsGP checks if the row exists in the table using the global executor, and panics on error.
+func (q namespaceQuery) ExistsGP(ctx context.Context) bool {
+	e, err := q.Exists(ctx, boil.GetContextDB())
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return e
+}
+
+// ExistsP checks if the row exists in the table, and panics on error.
+func (q namespaceQuery) ExistsP(ctx context.Context, exec boil.ContextExecutor) bool {
+	e, err := q.Exists(ctx, exec)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return e
 }
 
 // Exists checks if the row exists in the table.
@@ -360,6 +460,31 @@ func (q namespaceQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (
 func Namespaces(mods ...qm.QueryMod) namespaceQuery {
 	mods = append(mods, qm.From("\"namespaces\""))
 	return namespaceQuery{NewQuery(mods...)}
+}
+
+// FindNamespaceG retrieves a single record by ID.
+func FindNamespaceG(ctx context.Context, iD int64, selectCols ...string) (*Namespace, error) {
+	return FindNamespace(ctx, boil.GetContextDB(), iD, selectCols...)
+}
+
+// FindNamespaceP retrieves a single record by ID with an executor, and panics on error.
+func FindNamespaceP(ctx context.Context, exec boil.ContextExecutor, iD int64, selectCols ...string) *Namespace {
+	retobj, err := FindNamespace(ctx, exec, iD, selectCols...)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return retobj
+}
+
+// FindNamespaceGP retrieves a single record by ID, and panics on error.
+func FindNamespaceGP(ctx context.Context, iD int64, selectCols ...string) *Namespace {
+	retobj, err := FindNamespace(ctx, boil.GetContextDB(), iD, selectCols...)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return retobj
 }
 
 // FindNamespace retrieves a single record by ID with an executor.
@@ -386,6 +511,27 @@ func FindNamespace(ctx context.Context, exec boil.ContextExecutor, iD int64, sel
 	}
 
 	return namespaceObj, nil
+}
+
+// InsertG a single record. See Insert for whitelist behavior description.
+func (o *Namespace) InsertG(ctx context.Context, columns boil.Columns) error {
+	return o.Insert(ctx, boil.GetContextDB(), columns)
+}
+
+// InsertP a single record using an executor, and panics on error. See Insert
+// for whitelist behavior description.
+func (o *Namespace) InsertP(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) {
+	if err := o.Insert(ctx, exec, columns); err != nil {
+		panic(boil.WrapErr(err))
+	}
+}
+
+// InsertGP a single record, and panics on error. See Insert for whitelist
+// behavior description.
+func (o *Namespace) InsertGP(ctx context.Context, columns boil.Columns) {
+	if err := o.Insert(ctx, boil.GetContextDB(), columns); err != nil {
+		panic(boil.WrapErr(err))
+	}
 }
 
 // Insert a single record using an executor.
@@ -467,6 +613,34 @@ func (o *Namespace) Insert(ctx context.Context, exec boil.ContextExecutor, colum
 	return o.doAfterInsertHooks(ctx, exec)
 }
 
+// UpdateG a single Namespace record using the global executor.
+// See Update for more documentation.
+func (o *Namespace) UpdateG(ctx context.Context, columns boil.Columns) (int64, error) {
+	return o.Update(ctx, boil.GetContextDB(), columns)
+}
+
+// UpdateP uses an executor to update the Namespace, and panics on error.
+// See Update for more documentation.
+func (o *Namespace) UpdateP(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) int64 {
+	rowsAff, err := o.Update(ctx, exec, columns)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return rowsAff
+}
+
+// UpdateGP a single Namespace record using the global executor. Panics on error.
+// See Update for more documentation.
+func (o *Namespace) UpdateGP(ctx context.Context, columns boil.Columns) int64 {
+	rowsAff, err := o.Update(ctx, boil.GetContextDB(), columns)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return rowsAff
+}
+
 // Update uses an executor to update the Namespace.
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
@@ -530,6 +704,21 @@ func (o *Namespace) Update(ctx context.Context, exec boil.ContextExecutor, colum
 	return rowsAff, o.doAfterUpdateHooks(ctx, exec)
 }
 
+// UpdateAllP updates all rows with matching column names, and panics on error.
+func (q namespaceQuery) UpdateAllP(ctx context.Context, exec boil.ContextExecutor, cols M) int64 {
+	rowsAff, err := q.UpdateAll(ctx, exec, cols)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return rowsAff
+}
+
+// UpdateAllG updates all rows with the specified column values.
+func (q namespaceQuery) UpdateAllG(ctx context.Context, cols M) (int64, error) {
+	return q.UpdateAll(ctx, boil.GetContextDB(), cols)
+}
+
 // UpdateAll updates all rows with the specified column values.
 func (q namespaceQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
 	queries.SetUpdate(q.Query, cols)
@@ -545,6 +734,31 @@ func (q namespaceQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor
 	}
 
 	return rowsAff, nil
+}
+
+// UpdateAllG updates all rows with the specified column values.
+func (o NamespaceSlice) UpdateAllG(ctx context.Context, cols M) (int64, error) {
+	return o.UpdateAll(ctx, boil.GetContextDB(), cols)
+}
+
+// UpdateAllGP updates all rows with the specified column values, and panics on error.
+func (o NamespaceSlice) UpdateAllGP(ctx context.Context, cols M) int64 {
+	rowsAff, err := o.UpdateAll(ctx, boil.GetContextDB(), cols)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return rowsAff
+}
+
+// UpdateAllP updates all rows with the specified column values, and panics on error.
+func (o NamespaceSlice) UpdateAllP(ctx context.Context, exec boil.ContextExecutor, cols M) int64 {
+	rowsAff, err := o.UpdateAll(ctx, exec, cols)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return rowsAff
 }
 
 // UpdateAll updates all rows with the specified column values, using an executor.
@@ -593,6 +807,26 @@ func (o NamespaceSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor
 		return 0, errors.Wrap(err, "models: unable to retrieve rows affected all in update all namespace")
 	}
 	return rowsAff, nil
+}
+
+// UpsertG attempts an insert, and does an update or ignore on conflict.
+func (o *Namespace) UpsertG(ctx context.Context, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) error {
+	return o.Upsert(ctx, boil.GetContextDB(), updateOnConflict, conflictColumns, updateColumns, insertColumns)
+}
+
+// UpsertGP attempts an insert, and does an update or ignore on conflict. Panics on error.
+func (o *Namespace) UpsertGP(ctx context.Context, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) {
+	if err := o.Upsert(ctx, boil.GetContextDB(), updateOnConflict, conflictColumns, updateColumns, insertColumns); err != nil {
+		panic(boil.WrapErr(err))
+	}
+}
+
+// UpsertP attempts an insert using an executor, and does an update or ignore on conflict.
+// UpsertP panics on error.
+func (o *Namespace) UpsertP(ctx context.Context, exec boil.ContextExecutor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) {
+	if err := o.Upsert(ctx, exec, updateOnConflict, conflictColumns, updateColumns, insertColumns); err != nil {
+		panic(boil.WrapErr(err))
+	}
 }
 
 // Upsert attempts an insert using an executor, and does an update or ignore on conflict.
@@ -710,6 +944,36 @@ func (o *Namespace) Upsert(ctx context.Context, exec boil.ContextExecutor, updat
 	return o.doAfterUpsertHooks(ctx, exec)
 }
 
+// DeleteG deletes a single Namespace record.
+// DeleteG will match against the primary key column to find the record to delete.
+func (o *Namespace) DeleteG(ctx context.Context) (int64, error) {
+	return o.Delete(ctx, boil.GetContextDB())
+}
+
+// DeleteP deletes a single Namespace record with an executor.
+// DeleteP will match against the primary key column to find the record to delete.
+// Panics on error.
+func (o *Namespace) DeleteP(ctx context.Context, exec boil.ContextExecutor) int64 {
+	rowsAff, err := o.Delete(ctx, exec)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return rowsAff
+}
+
+// DeleteGP deletes a single Namespace record.
+// DeleteGP will match against the primary key column to find the record to delete.
+// Panics on error.
+func (o *Namespace) DeleteGP(ctx context.Context) int64 {
+	rowsAff, err := o.Delete(ctx, boil.GetContextDB())
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return rowsAff
+}
+
 // Delete deletes a single Namespace record with an executor.
 // Delete will match against the primary key column to find the record to delete.
 func (o *Namespace) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
@@ -746,6 +1010,20 @@ func (o *Namespace) Delete(ctx context.Context, exec boil.ContextExecutor) (int6
 	return rowsAff, nil
 }
 
+func (q namespaceQuery) DeleteAllG(ctx context.Context) (int64, error) {
+	return q.DeleteAll(ctx, boil.GetContextDB())
+}
+
+// DeleteAllP deletes all rows, and panics on error.
+func (q namespaceQuery) DeleteAllP(ctx context.Context, exec boil.ContextExecutor) int64 {
+	rowsAff, err := q.DeleteAll(ctx, exec)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return rowsAff
+}
+
 // DeleteAll deletes all matching rows.
 func (q namespaceQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if q.Query == nil {
@@ -765,6 +1043,31 @@ func (q namespaceQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor
 	}
 
 	return rowsAff, nil
+}
+
+// DeleteAllG deletes all rows in the slice.
+func (o NamespaceSlice) DeleteAllG(ctx context.Context) (int64, error) {
+	return o.DeleteAll(ctx, boil.GetContextDB())
+}
+
+// DeleteAllP deletes all rows in the slice, using an executor, and panics on error.
+func (o NamespaceSlice) DeleteAllP(ctx context.Context, exec boil.ContextExecutor) int64 {
+	rowsAff, err := o.DeleteAll(ctx, exec)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return rowsAff
+}
+
+// DeleteAllGP deletes all rows in the slice, and panics on error.
+func (o NamespaceSlice) DeleteAllGP(ctx context.Context) int64 {
+	rowsAff, err := o.DeleteAll(ctx, boil.GetContextDB())
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return rowsAff
 }
 
 // DeleteAll deletes all rows in the slice, using an executor.
@@ -816,6 +1119,29 @@ func (o NamespaceSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor
 	return rowsAff, nil
 }
 
+// ReloadG refetches the object from the database using the primary keys.
+func (o *Namespace) ReloadG(ctx context.Context) error {
+	if o == nil {
+		return errors.New("models: no Namespace provided for reload")
+	}
+
+	return o.Reload(ctx, boil.GetContextDB())
+}
+
+// ReloadP refetches the object from the database with an executor. Panics on error.
+func (o *Namespace) ReloadP(ctx context.Context, exec boil.ContextExecutor) {
+	if err := o.Reload(ctx, exec); err != nil {
+		panic(boil.WrapErr(err))
+	}
+}
+
+// ReloadGP refetches the object from the database and panics on error.
+func (o *Namespace) ReloadGP(ctx context.Context) {
+	if err := o.Reload(ctx, boil.GetContextDB()); err != nil {
+		panic(boil.WrapErr(err))
+	}
+}
+
 // Reload refetches the object from the database
 // using the primary keys with an executor.
 func (o *Namespace) Reload(ctx context.Context, exec boil.ContextExecutor) error {
@@ -826,6 +1152,34 @@ func (o *Namespace) Reload(ctx context.Context, exec boil.ContextExecutor) error
 
 	*o = *ret
 	return nil
+}
+
+// ReloadAllG refetches every row with matching primary key column values
+// and overwrites the original object slice with the newly updated slice.
+func (o *NamespaceSlice) ReloadAllG(ctx context.Context) error {
+	if o == nil {
+		return errors.New("models: empty NamespaceSlice provided for reload all")
+	}
+
+	return o.ReloadAll(ctx, boil.GetContextDB())
+}
+
+// ReloadAllP refetches every row with matching primary key column values
+// and overwrites the original object slice with the newly updated slice.
+// Panics on error.
+func (o *NamespaceSlice) ReloadAllP(ctx context.Context, exec boil.ContextExecutor) {
+	if err := o.ReloadAll(ctx, exec); err != nil {
+		panic(boil.WrapErr(err))
+	}
+}
+
+// ReloadAllGP refetches every row with matching primary key column values
+// and overwrites the original object slice with the newly updated slice.
+// Panics on error.
+func (o *NamespaceSlice) ReloadAllGP(ctx context.Context) {
+	if err := o.ReloadAll(ctx, boil.GetContextDB()); err != nil {
+		panic(boil.WrapErr(err))
+	}
 }
 
 // ReloadAll refetches every row with matching primary key column values
@@ -855,6 +1209,31 @@ func (o *NamespaceSlice) ReloadAll(ctx context.Context, exec boil.ContextExecuto
 	*o = slice
 
 	return nil
+}
+
+// NamespaceExistsG checks if the Namespace row exists.
+func NamespaceExistsG(ctx context.Context, iD int64) (bool, error) {
+	return NamespaceExists(ctx, boil.GetContextDB(), iD)
+}
+
+// NamespaceExistsP checks if the Namespace row exists. Panics on error.
+func NamespaceExistsP(ctx context.Context, exec boil.ContextExecutor, iD int64) bool {
+	e, err := NamespaceExists(ctx, exec, iD)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return e
+}
+
+// NamespaceExistsGP checks if the Namespace row exists. Panics on error.
+func NamespaceExistsGP(ctx context.Context, iD int64) bool {
+	e, err := NamespaceExists(ctx, boil.GetContextDB(), iD)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return e
 }
 
 // NamespaceExists checks if the Namespace row exists.

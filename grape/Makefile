@@ -14,5 +14,5 @@ migrateredo:
 	rake db:migrate
 
 generate_models:
-	sqlboiler -c config/sqlboiler.toml psql
+	sqlboiler -c config/sqlboiler.toml --add-global-variants --add-panic-variants psql
 	go generate models/services_helper.go

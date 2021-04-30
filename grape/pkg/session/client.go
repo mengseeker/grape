@@ -2,7 +2,7 @@ package session
 
 import (
 	"errors"
-	"grape/grape/pkg/rediskv"
+	"grape/pkg/rediskv"
 )
 
 const (
@@ -14,7 +14,7 @@ var (
 )
 
 func Save(s *Session) {
-	_, err := rediskv.GetClient().Do("SETEX", s.ID, s.Marshal(), TTL)
+	_, err := rediskv.GetClient().Do("SETEX", s.ID, TTL, s.Marshal())
 	if err != nil {
 		panic(err)
 	}
@@ -28,5 +28,5 @@ func Find(id string) (*Session, error) {
 	if reply == nil {
 		return nil, ErrSessionNotFound
 	}
-	return UnMarshal([]byte(reply.(string))), nil
+	return UnMarshal([]byte(reply.([]byte))), nil
 }

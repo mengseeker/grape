@@ -335,6 +335,31 @@ func AddClusterHook(hookPoint boil.HookPoint, clusterHook ClusterHook) {
 	}
 }
 
+// OneG returns a single cluster record from the query using the global executor.
+func (q clusterQuery) OneG(ctx context.Context) (*Cluster, error) {
+	return q.One(ctx, boil.GetContextDB())
+}
+
+// OneGP returns a single cluster record from the query using the global executor, and panics on error.
+func (q clusterQuery) OneGP(ctx context.Context) *Cluster {
+	o, err := q.One(ctx, boil.GetContextDB())
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return o
+}
+
+// OneP returns a single cluster record from the query, and panics on error.
+func (q clusterQuery) OneP(ctx context.Context, exec boil.ContextExecutor) *Cluster {
+	o, err := q.One(ctx, exec)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return o
+}
+
 // One returns a single cluster record from the query.
 func (q clusterQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Cluster, error) {
 	o := &Cluster{}
@@ -354,6 +379,31 @@ func (q clusterQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Clus
 	}
 
 	return o, nil
+}
+
+// AllG returns all Cluster records from the query using the global executor.
+func (q clusterQuery) AllG(ctx context.Context) (ClusterSlice, error) {
+	return q.All(ctx, boil.GetContextDB())
+}
+
+// AllGP returns all Cluster records from the query using the global executor, and panics on error.
+func (q clusterQuery) AllGP(ctx context.Context) ClusterSlice {
+	o, err := q.All(ctx, boil.GetContextDB())
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return o
+}
+
+// AllP returns all Cluster records from the query, and panics on error.
+func (q clusterQuery) AllP(ctx context.Context, exec boil.ContextExecutor) ClusterSlice {
+	o, err := q.All(ctx, exec)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return o
 }
 
 // All returns all Cluster records from the query.
@@ -376,6 +426,31 @@ func (q clusterQuery) All(ctx context.Context, exec boil.ContextExecutor) (Clust
 	return o, nil
 }
 
+// CountG returns the count of all Cluster records in the query, and panics on error.
+func (q clusterQuery) CountG(ctx context.Context) (int64, error) {
+	return q.Count(ctx, boil.GetContextDB())
+}
+
+// CountGP returns the count of all Cluster records in the query using the global executor, and panics on error.
+func (q clusterQuery) CountGP(ctx context.Context) int64 {
+	c, err := q.Count(ctx, boil.GetContextDB())
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return c
+}
+
+// CountP returns the count of all Cluster records in the query, and panics on error.
+func (q clusterQuery) CountP(ctx context.Context, exec boil.ContextExecutor) int64 {
+	c, err := q.Count(ctx, exec)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return c
+}
+
 // Count returns the count of all Cluster records in the query.
 func (q clusterQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	var count int64
@@ -389,6 +464,31 @@ func (q clusterQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int
 	}
 
 	return count, nil
+}
+
+// ExistsG checks if the row exists in the table, and panics on error.
+func (q clusterQuery) ExistsG(ctx context.Context) (bool, error) {
+	return q.Exists(ctx, boil.GetContextDB())
+}
+
+// ExistsGP checks if the row exists in the table using the global executor, and panics on error.
+func (q clusterQuery) ExistsGP(ctx context.Context) bool {
+	e, err := q.Exists(ctx, boil.GetContextDB())
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return e
+}
+
+// ExistsP checks if the row exists in the table, and panics on error.
+func (q clusterQuery) ExistsP(ctx context.Context, exec boil.ContextExecutor) bool {
+	e, err := q.Exists(ctx, exec)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return e
 }
 
 // Exists checks if the row exists in the table.
@@ -411,6 +511,31 @@ func (q clusterQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bo
 func Clusters(mods ...qm.QueryMod) clusterQuery {
 	mods = append(mods, qm.From("\"clusters\""))
 	return clusterQuery{NewQuery(mods...)}
+}
+
+// FindClusterG retrieves a single record by ID.
+func FindClusterG(ctx context.Context, iD int64, selectCols ...string) (*Cluster, error) {
+	return FindCluster(ctx, boil.GetContextDB(), iD, selectCols...)
+}
+
+// FindClusterP retrieves a single record by ID with an executor, and panics on error.
+func FindClusterP(ctx context.Context, exec boil.ContextExecutor, iD int64, selectCols ...string) *Cluster {
+	retobj, err := FindCluster(ctx, exec, iD, selectCols...)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return retobj
+}
+
+// FindClusterGP retrieves a single record by ID, and panics on error.
+func FindClusterGP(ctx context.Context, iD int64, selectCols ...string) *Cluster {
+	retobj, err := FindCluster(ctx, boil.GetContextDB(), iD, selectCols...)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return retobj
 }
 
 // FindCluster retrieves a single record by ID with an executor.
@@ -437,6 +562,27 @@ func FindCluster(ctx context.Context, exec boil.ContextExecutor, iD int64, selec
 	}
 
 	return clusterObj, nil
+}
+
+// InsertG a single record. See Insert for whitelist behavior description.
+func (o *Cluster) InsertG(ctx context.Context, columns boil.Columns) error {
+	return o.Insert(ctx, boil.GetContextDB(), columns)
+}
+
+// InsertP a single record using an executor, and panics on error. See Insert
+// for whitelist behavior description.
+func (o *Cluster) InsertP(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) {
+	if err := o.Insert(ctx, exec, columns); err != nil {
+		panic(boil.WrapErr(err))
+	}
+}
+
+// InsertGP a single record, and panics on error. See Insert for whitelist
+// behavior description.
+func (o *Cluster) InsertGP(ctx context.Context, columns boil.Columns) {
+	if err := o.Insert(ctx, boil.GetContextDB(), columns); err != nil {
+		panic(boil.WrapErr(err))
+	}
 }
 
 // Insert a single record using an executor.
@@ -518,6 +664,34 @@ func (o *Cluster) Insert(ctx context.Context, exec boil.ContextExecutor, columns
 	return o.doAfterInsertHooks(ctx, exec)
 }
 
+// UpdateG a single Cluster record using the global executor.
+// See Update for more documentation.
+func (o *Cluster) UpdateG(ctx context.Context, columns boil.Columns) (int64, error) {
+	return o.Update(ctx, boil.GetContextDB(), columns)
+}
+
+// UpdateP uses an executor to update the Cluster, and panics on error.
+// See Update for more documentation.
+func (o *Cluster) UpdateP(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) int64 {
+	rowsAff, err := o.Update(ctx, exec, columns)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return rowsAff
+}
+
+// UpdateGP a single Cluster record using the global executor. Panics on error.
+// See Update for more documentation.
+func (o *Cluster) UpdateGP(ctx context.Context, columns boil.Columns) int64 {
+	rowsAff, err := o.Update(ctx, boil.GetContextDB(), columns)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return rowsAff
+}
+
 // Update uses an executor to update the Cluster.
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
@@ -581,6 +755,21 @@ func (o *Cluster) Update(ctx context.Context, exec boil.ContextExecutor, columns
 	return rowsAff, o.doAfterUpdateHooks(ctx, exec)
 }
 
+// UpdateAllP updates all rows with matching column names, and panics on error.
+func (q clusterQuery) UpdateAllP(ctx context.Context, exec boil.ContextExecutor, cols M) int64 {
+	rowsAff, err := q.UpdateAll(ctx, exec, cols)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return rowsAff
+}
+
+// UpdateAllG updates all rows with the specified column values.
+func (q clusterQuery) UpdateAllG(ctx context.Context, cols M) (int64, error) {
+	return q.UpdateAll(ctx, boil.GetContextDB(), cols)
+}
+
 // UpdateAll updates all rows with the specified column values.
 func (q clusterQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
 	queries.SetUpdate(q.Query, cols)
@@ -596,6 +785,31 @@ func (q clusterQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, 
 	}
 
 	return rowsAff, nil
+}
+
+// UpdateAllG updates all rows with the specified column values.
+func (o ClusterSlice) UpdateAllG(ctx context.Context, cols M) (int64, error) {
+	return o.UpdateAll(ctx, boil.GetContextDB(), cols)
+}
+
+// UpdateAllGP updates all rows with the specified column values, and panics on error.
+func (o ClusterSlice) UpdateAllGP(ctx context.Context, cols M) int64 {
+	rowsAff, err := o.UpdateAll(ctx, boil.GetContextDB(), cols)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return rowsAff
+}
+
+// UpdateAllP updates all rows with the specified column values, and panics on error.
+func (o ClusterSlice) UpdateAllP(ctx context.Context, exec boil.ContextExecutor, cols M) int64 {
+	rowsAff, err := o.UpdateAll(ctx, exec, cols)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return rowsAff
 }
 
 // UpdateAll updates all rows with the specified column values, using an executor.
@@ -644,6 +858,26 @@ func (o ClusterSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, 
 		return 0, errors.Wrap(err, "models: unable to retrieve rows affected all in update all cluster")
 	}
 	return rowsAff, nil
+}
+
+// UpsertG attempts an insert, and does an update or ignore on conflict.
+func (o *Cluster) UpsertG(ctx context.Context, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) error {
+	return o.Upsert(ctx, boil.GetContextDB(), updateOnConflict, conflictColumns, updateColumns, insertColumns)
+}
+
+// UpsertGP attempts an insert, and does an update or ignore on conflict. Panics on error.
+func (o *Cluster) UpsertGP(ctx context.Context, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) {
+	if err := o.Upsert(ctx, boil.GetContextDB(), updateOnConflict, conflictColumns, updateColumns, insertColumns); err != nil {
+		panic(boil.WrapErr(err))
+	}
+}
+
+// UpsertP attempts an insert using an executor, and does an update or ignore on conflict.
+// UpsertP panics on error.
+func (o *Cluster) UpsertP(ctx context.Context, exec boil.ContextExecutor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) {
+	if err := o.Upsert(ctx, exec, updateOnConflict, conflictColumns, updateColumns, insertColumns); err != nil {
+		panic(boil.WrapErr(err))
+	}
 }
 
 // Upsert attempts an insert using an executor, and does an update or ignore on conflict.
@@ -761,6 +995,36 @@ func (o *Cluster) Upsert(ctx context.Context, exec boil.ContextExecutor, updateO
 	return o.doAfterUpsertHooks(ctx, exec)
 }
 
+// DeleteG deletes a single Cluster record.
+// DeleteG will match against the primary key column to find the record to delete.
+func (o *Cluster) DeleteG(ctx context.Context) (int64, error) {
+	return o.Delete(ctx, boil.GetContextDB())
+}
+
+// DeleteP deletes a single Cluster record with an executor.
+// DeleteP will match against the primary key column to find the record to delete.
+// Panics on error.
+func (o *Cluster) DeleteP(ctx context.Context, exec boil.ContextExecutor) int64 {
+	rowsAff, err := o.Delete(ctx, exec)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return rowsAff
+}
+
+// DeleteGP deletes a single Cluster record.
+// DeleteGP will match against the primary key column to find the record to delete.
+// Panics on error.
+func (o *Cluster) DeleteGP(ctx context.Context) int64 {
+	rowsAff, err := o.Delete(ctx, boil.GetContextDB())
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return rowsAff
+}
+
 // Delete deletes a single Cluster record with an executor.
 // Delete will match against the primary key column to find the record to delete.
 func (o *Cluster) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
@@ -797,6 +1061,20 @@ func (o *Cluster) Delete(ctx context.Context, exec boil.ContextExecutor) (int64,
 	return rowsAff, nil
 }
 
+func (q clusterQuery) DeleteAllG(ctx context.Context) (int64, error) {
+	return q.DeleteAll(ctx, boil.GetContextDB())
+}
+
+// DeleteAllP deletes all rows, and panics on error.
+func (q clusterQuery) DeleteAllP(ctx context.Context, exec boil.ContextExecutor) int64 {
+	rowsAff, err := q.DeleteAll(ctx, exec)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return rowsAff
+}
+
 // DeleteAll deletes all matching rows.
 func (q clusterQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if q.Query == nil {
@@ -816,6 +1094,31 @@ func (q clusterQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) 
 	}
 
 	return rowsAff, nil
+}
+
+// DeleteAllG deletes all rows in the slice.
+func (o ClusterSlice) DeleteAllG(ctx context.Context) (int64, error) {
+	return o.DeleteAll(ctx, boil.GetContextDB())
+}
+
+// DeleteAllP deletes all rows in the slice, using an executor, and panics on error.
+func (o ClusterSlice) DeleteAllP(ctx context.Context, exec boil.ContextExecutor) int64 {
+	rowsAff, err := o.DeleteAll(ctx, exec)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return rowsAff
+}
+
+// DeleteAllGP deletes all rows in the slice, and panics on error.
+func (o ClusterSlice) DeleteAllGP(ctx context.Context) int64 {
+	rowsAff, err := o.DeleteAll(ctx, boil.GetContextDB())
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return rowsAff
 }
 
 // DeleteAll deletes all rows in the slice, using an executor.
@@ -867,6 +1170,29 @@ func (o ClusterSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) 
 	return rowsAff, nil
 }
 
+// ReloadG refetches the object from the database using the primary keys.
+func (o *Cluster) ReloadG(ctx context.Context) error {
+	if o == nil {
+		return errors.New("models: no Cluster provided for reload")
+	}
+
+	return o.Reload(ctx, boil.GetContextDB())
+}
+
+// ReloadP refetches the object from the database with an executor. Panics on error.
+func (o *Cluster) ReloadP(ctx context.Context, exec boil.ContextExecutor) {
+	if err := o.Reload(ctx, exec); err != nil {
+		panic(boil.WrapErr(err))
+	}
+}
+
+// ReloadGP refetches the object from the database and panics on error.
+func (o *Cluster) ReloadGP(ctx context.Context) {
+	if err := o.Reload(ctx, boil.GetContextDB()); err != nil {
+		panic(boil.WrapErr(err))
+	}
+}
+
 // Reload refetches the object from the database
 // using the primary keys with an executor.
 func (o *Cluster) Reload(ctx context.Context, exec boil.ContextExecutor) error {
@@ -877,6 +1203,34 @@ func (o *Cluster) Reload(ctx context.Context, exec boil.ContextExecutor) error {
 
 	*o = *ret
 	return nil
+}
+
+// ReloadAllG refetches every row with matching primary key column values
+// and overwrites the original object slice with the newly updated slice.
+func (o *ClusterSlice) ReloadAllG(ctx context.Context) error {
+	if o == nil {
+		return errors.New("models: empty ClusterSlice provided for reload all")
+	}
+
+	return o.ReloadAll(ctx, boil.GetContextDB())
+}
+
+// ReloadAllP refetches every row with matching primary key column values
+// and overwrites the original object slice with the newly updated slice.
+// Panics on error.
+func (o *ClusterSlice) ReloadAllP(ctx context.Context, exec boil.ContextExecutor) {
+	if err := o.ReloadAll(ctx, exec); err != nil {
+		panic(boil.WrapErr(err))
+	}
+}
+
+// ReloadAllGP refetches every row with matching primary key column values
+// and overwrites the original object slice with the newly updated slice.
+// Panics on error.
+func (o *ClusterSlice) ReloadAllGP(ctx context.Context) {
+	if err := o.ReloadAll(ctx, boil.GetContextDB()); err != nil {
+		panic(boil.WrapErr(err))
+	}
 }
 
 // ReloadAll refetches every row with matching primary key column values
@@ -906,6 +1260,31 @@ func (o *ClusterSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor)
 	*o = slice
 
 	return nil
+}
+
+// ClusterExistsG checks if the Cluster row exists.
+func ClusterExistsG(ctx context.Context, iD int64) (bool, error) {
+	return ClusterExists(ctx, boil.GetContextDB(), iD)
+}
+
+// ClusterExistsP checks if the Cluster row exists. Panics on error.
+func ClusterExistsP(ctx context.Context, exec boil.ContextExecutor, iD int64) bool {
+	e, err := ClusterExists(ctx, exec, iD)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return e
+}
+
+// ClusterExistsGP checks if the Cluster row exists. Panics on error.
+func ClusterExistsGP(ctx context.Context, iD int64) bool {
+	e, err := ClusterExists(ctx, boil.GetContextDB(), iD)
+	if err != nil {
+		panic(boil.WrapErr(err))
+	}
+
+	return e
 }
 
 // ClusterExists checks if the Cluster row exists.
