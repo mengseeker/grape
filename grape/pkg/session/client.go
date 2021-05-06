@@ -2,7 +2,7 @@ package session
 
 import (
 	"errors"
-	"grape/pkg/rediskv"
+	"grape/pkg/redispool"
 )
 
 const (
@@ -14,14 +14,14 @@ var (
 )
 
 func Save(s *Session) {
-	_, err := rediskv.GetClient().Do("SETEX", s.ID, TTL, s.Marshal())
+	_, err := redispool.GetClient().Do("SETEX", s.ID, TTL, s.Marshal())
 	if err != nil {
 		panic(err)
 	}
 }
 
 func Find(id string) (*Session, error) {
-	reply, err := rediskv.GetClient().Do("GET", id)
+	reply, err := redispool.GetClient().Do("GET", id)
 	if err != nil {
 		panic(err)
 	}

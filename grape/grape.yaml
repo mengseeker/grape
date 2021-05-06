@@ -1,5 +1,5 @@
 database: dbname=grape user=grape password=grape
 address: :5000
 ginmode: debug
-boildebug: true
+boildebug: boil_sql.log
 redis: :6379

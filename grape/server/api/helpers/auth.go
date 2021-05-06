@@ -21,3 +21,8 @@ func Auth(c *gin.Context) {
 	}
 	c.Set("session", s)
 }
+
+func GetSession(c *gin.Context) *session.Session {
+	val, _ := c.Get("session")
+	return val.(*session.Session)
+}

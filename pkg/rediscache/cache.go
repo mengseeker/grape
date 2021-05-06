@@ -2,7 +2,7 @@ package rediscache
 
 import (
 	"encoding/json"
-	"grape/pkg/rediskv"
+	"grape/pkg/redispool"
 )
 
 const (
@@ -10,7 +10,7 @@ const (
 )
 
 func AutoGet(key string, v func() interface{}) interface{} {
-	rep, err := rediskv.GetClient().Do("GET", key)
+	rep, err := redispool.GetClient().Do("GET", key)
 	if err != nil {
 		panic(err)
 	}
@@ -20,7 +20,7 @@ func AutoGet(key string, v func() interface{}) interface{} {
 		if err != nil {
 			panic(err)
 		}
-		_, err = rediskv.GetClient().Do("SETEX", key, TTL, raw)
+		_, err = redispool.GetClient().Do("SETEX", key, TTL, raw)
 		if err != nil {
 			panic(err)
 		}
@@ -35,7 +35,7 @@ func AutoGet(key string, v func() interface{}) interface{} {
 }
 
 func UnSet(key string) {
-	_, err := rediskv.GetClient().Do("DEL", key)
+	_, err := redispool.GetClient().Do("DEL", key)
 	if err != nil {
 		panic(err)
 	}

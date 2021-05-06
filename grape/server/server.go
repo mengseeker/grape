@@ -1,6 +1,7 @@
 package server
 
 import (
+	h "grape/grape/server/api/helpers"
 	"grape/grape/server/api/service"
 	"grape/grape/server/ui"
 
@@ -8,7 +9,9 @@ import (
 )
 
 func GetRouter() *gin.Engine {
-	r := gin.Default()
+	r := gin.New()
+	r.Use(gin.Logger())
+	r.Use(gin.CustomRecovery(h.Recovery))
 	r.GET("/health", func(c *gin.Context) {
 		c.String(200, "health")
 	})

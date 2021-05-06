@@ -10,4 +10,6 @@ func Mount(e *gin.Engine) {
 	r := e.Group("/api/service")
 	r.Use(helpers.Auth)
 	r.GET("/list", listService)
+	r.GET("/info", serviceInfo)
+	r.POST("/create", createService)
 }

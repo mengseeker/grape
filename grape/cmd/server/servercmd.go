@@ -3,14 +3,15 @@ package server
 import (
 	"database/sql"
 	"grape/grape/server"
-	"grape/pkg/rediskv"
+	"grape/pkg/redispool"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/volatiletech/sqlboiler/boil"
+	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
 var (
@@ -62,18 +63,29 @@ func InitConfig(cfg string) {
 }
 
 func InitDatabase() {
-	db, err := sql.Open("postgres", "dbname=fun user=abc")
+	db, err := sql.Open("postgres", viper.GetString("database"))
 	if err != nil {
 		log.Fatalf("unable to connect db: %v", err)
 	}
-	boil.DebugMode = viper.GetBool("boildebug")
+	boildebugmode := viper.GetString("boildebug")
+	if boildebugmode != "" {
+		boil.DebugMode = true
+		if boildebugmode != "/dev/stdout" {
+			fh, err := os.OpenFile(boildebugmode, os.O_CREATE | os.O_RDWR, 0644)
+			if err != nil {
+				log.Fatalf("init boil err: %v", err)
+			}
+			boil.DebugWriter = fh
+		}
+	}
+
 	log.Infof("database connected!")
 	boil.SetDB(db)
 	boil.SetLocation(time.Local)
 }
 
 func InitRedis() {
-	err := rediskv.Connect(viper.GetString("redis"))
+	err := redispool.Connect(viper.GetString("redis"))
 	if err != nil {
 		log.Fatalf("unable to connect redis: %v", err)
 	}
