@@ -54,3 +54,7 @@ func (s *Session) Set(key string, val interface{}) {
 func (s *Session) Get(key string) interface{} {
 	return s.Data[key]
 }
+
+func (s *Session) Save() {
+	Save(s)
+}

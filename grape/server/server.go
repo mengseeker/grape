@@ -2,6 +2,7 @@ package server
 
 import (
 	h "grape/grape/server/api/helpers"
+	"grape/grape/server/api/login"
 	"grape/grape/server/api/service"
 	"grape/grape/server/ui"
 
@@ -16,6 +17,7 @@ func GetRouter() *gin.Engine {
 		c.String(200, "health")
 	})
 	service.Mount(r)
+	login.Mount(r)
 	ui.Mount(r)
 	return r
 }
