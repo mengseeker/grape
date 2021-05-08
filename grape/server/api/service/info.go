@@ -2,6 +2,7 @@ package service
 
 import (
 	"grape/grape/models"
+	"grape/grape/server/api"
 	h "grape/grape/server/api/helpers"
 
 	"github.com/gin-gonic/gin"
@@ -9,11 +10,7 @@ import (
 
 func serviceInfo(c *gin.Context) {
 	id := h.ParamInt(c, "id", 1)
-	service, err := models.FindServiceG(c, int64(id))
-	if err != nil {
-		panic(err)
-	}
-	h.RRR(c,
-		"info", service,
-	)
+	var service models.Service
+	api.DB().Model(&service).First(&service, id)
+	h.RRJsonObj(c, service)
 }

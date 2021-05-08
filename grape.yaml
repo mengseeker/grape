@@ -1,5 +1,5 @@
-database: dbname=grape user=grape password=grape
+database: host=localhost dbname=grape user=grape password=grape
 address: :5000
 ginmode: debug
-boildebug: boil_sql.log
 redis: :6379
+automigrate: true

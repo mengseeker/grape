@@ -40,6 +40,15 @@ func RR(c *gin.Context, code int, message string, stringAndValData ...interface{
 	R(c, &r)
 }
 
+func RRJsonObj(c *gin.Context, obj interface{}) {
+	r := Response{
+		Code:    OkCode,
+		Message: SuccessMessage,
+		Data:    obj,
+	}
+	R(c, &r)
+}
+
 func RRR(c *gin.Context, stringAndValData ...interface{}) {
 	RR(c, OkCode, SuccessMessage, stringAndValData...)
 }

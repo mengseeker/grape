@@ -2,11 +2,11 @@ package models
 
 import "time"
 
-// Namespace is an object representing the database table.
-type Namespace struct {
+// EtcdLink is an object representing the database table.
+type EtcdLink struct {
 	ID        int64  `gorm:"primaryKey" json:"id"`
 	Name      string `gorm:"index;unique;not null;" json:"name"`
-	Code      string `gorm:"index;unique;not null;" json:"code"`
+	Address   string `gorm:"not null;" json:"address"`
 	Note      string `gorm:"not null;default:'';" json:"note"`
 	CreatedAt time.Time
 	UpdatedAt time.Time

@@ -1,32 +1,23 @@
 package service
 
 import (
-	"grape/grape/models"
+	"grape/grape/bl"
 	h "grape/grape/server/api/helpers"
 	"grape/pkg/redislocker"
 
 	"github.com/gin-gonic/gin"
-	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
 func createService(c *gin.Context) {
 	s := h.GetSession(c)
+	name := h.RequirePostFormStr(c, "name")
+	code := h.RequirePostFormStr(c, "code")
+	port := h.RequirePostFormInt(c, "port")
+	protocol := h.RequirePostFormInt(c, "protocol")
+	external := h.PostFromInt(c, "external", 0)
+	note := h.PostFromStr(c, "note")
 	redislocker.LockP("lock_grape_create_service_"+s.ID, 0, func() {
-		name := h.RequirePostFormStr(c, "name")
-		code := h.RequirePostFormStr(c, "code")
-		port := h.RequirePostFormInt(c, "port")
-		protocol := h.RequirePostFormInt(c, "protocol")
-		external := h.PostFromInt(c, "external", 0)
-		note := h.PostFromStr(c, "note")
-		service := models.Service{
-			Name:     name,
-			Code:     code,
-			Port:     port,
-			Protocol: protocol,
-			External: external,
-			Note:     note,
-		}
-		service.InsertGP(c, boil.Infer())
+		service := bl.CreateService(name, code, port, protocol, external, note)
+		h.RRJsonObj(c, service)
 	})
-	h.RRR(c)
 }

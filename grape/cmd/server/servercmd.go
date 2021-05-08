@@ -1,17 +1,14 @@
 package server
 
 import (
-	"database/sql"
+	"grape/grape/models"
+	"grape/grape/pkg/postgresdb"
 	"grape/grape/server"
 	"grape/pkg/redispool"
-	"os"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	_ "github.com/lib/pq"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
 var (
@@ -50,7 +47,7 @@ func InitConfig(cfg string) {
 	viper.SetDefault("address", ":5000")
 	viper.SetDefault("redis", ":6379")
 	viper.SetDefault("ginmode", gin.ReleaseMode)
-	viper.SetDefault("boildebug", false)
+	viper.SetDefault("automigrate", false)
 
 	viper.SetConfigFile(cfg)
 	viper.SetEnvPrefix(envPrefix)
@@ -63,25 +60,16 @@ func InitConfig(cfg string) {
 }
 
 func InitDatabase() {
-	db, err := sql.Open("postgres", viper.GetString("database"))
+	err := postgresdb.Connect(viper.GetString("database"))
 	if err != nil {
 		log.Fatalf("unable to connect db: %v", err)
 	}
-	boildebugmode := viper.GetString("boildebug")
-	if boildebugmode != "" {
-		boil.DebugMode = true
-		if boildebugmode != "/dev/stdout" {
-			fh, err := os.OpenFile(boildebugmode, os.O_CREATE | os.O_RDWR, 0644)
-			if err != nil {
-				log.Fatalf("init boil err: %v", err)
-			}
-			boil.DebugWriter = fh
-		}
+
+	if viper.GetBool("automigrate") {
+		autoMigrate()
 	}
 
 	log.Infof("database connected!")
-	boil.SetDB(db)
-	boil.SetLocation(time.Local)
 }
 
 func InitRedis() {
@@ -90,4 +78,20 @@ func InitRedis() {
 		log.Fatalf("unable to connect redis: %v", err)
 	}
 	log.Infof("redis connected!")
+}
+
+func autoMigrate() {
+	err := postgresdb.GetDB().AutoMigrate(
+		&models.Namespace{},
+		&models.EtcdLink{},
+		&models.Cluster{},
+		&models.Service{},
+		&models.Group{},
+		&models.Node{},
+		&models.Policy{},
+		&models.User{},
+	)
+	if err != nil {
+		log.Fatalf("automigrate err: %v", err)
+	}
 }

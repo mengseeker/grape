@@ -15,7 +15,7 @@ func normalLogin(c *gin.Context) {
 		s := session.NewSession(1)
 		s.Save()
 		h.RRR(c,
-			"Token", s.ID,
+			"token", s.ID,
 		)
 	}
 }

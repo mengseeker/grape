@@ -7,8 +7,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func ParamExist(c *gin.Context, key string, caller ...func(val string)) bool {
+	val, ok := c.GetQuery(key)
+	if ok {
+		for _, cal := range caller {
+			cal(val)
+		}
+	}
+	return ok
+}
+
 func ParamInt(c *gin.Context, key string, defaultVal int) int {
-	r, err := strconv.Atoi(c.Param(key))
+	r, err := strconv.Atoi(c.Query(key))
 	if err != nil {
 		return defaultVal
 	}
@@ -16,7 +26,7 @@ func ParamInt(c *gin.Context, key string, defaultVal int) int {
 }
 
 func RequireParamInt(c *gin.Context, key string) int {
-	val := c.Param("page")
+	val := c.Query("page")
 	if val == "" {
 		panic(fmt.Errorf("param %s is required", key))
 	}
@@ -51,7 +61,6 @@ func RequirePostFormInt(c *gin.Context, key string) int {
 	return r
 }
 
-
 func PostFromInt(c *gin.Context, key string, defaultVal int) int {
 	r, err := strconv.Atoi(c.PostForm(key))
 	if err != nil {
@@ -59,4 +68,3 @@ func PostFromInt(c *gin.Context, key string, defaultVal int) int {
 	}
 	return r
 }
-
