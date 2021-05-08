@@ -22,7 +22,7 @@ func Connect(dsn string) error {
 			SlowThreshold:             time.Second,
 			LogLevel:                  logger.Info,
 			IgnoreRecordNotFoundError: true,
-			Colorful:                  false,
+			Colorful:                  true,
 		},
 	)
 	dbconn, err = gorm.Open(postgres.Open(dsn), &gorm.Config{

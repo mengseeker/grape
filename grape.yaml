@@ -2,4 +2,4 @@ database: host=localhost dbname=grape user=grape password=grape
 address: :5000
 ginmode: debug
 redis: :6379
-automigrate: true
+# automigrate: true
