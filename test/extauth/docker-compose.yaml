@@ -1,0 +1,34 @@
+version: "3.7"
+services:
+  frontenvoy:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontenvoy
+    networks:
+      - envoymesh
+    ports:
+      - "8080:8080"
+
+  service1:
+    build:
+      context: .
+      dockerfile: Dockerfile.service1
+    networks:
+      envoymesh:
+        aliases:
+          - service1
+    environment:
+      - PORT=8080
+
+      
+  extauth:
+    image: extauth
+    networks:
+      envoymesh:
+        aliases:
+          - extauth
+    environment:
+      - PORT=11001
+
+networks:
+  envoymesh: {}

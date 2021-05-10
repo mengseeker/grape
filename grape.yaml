@@ -3,3 +3,11 @@ address: :5000
 ginmode: debug
 redis: :6379
 # automigrate: true
+
+auth:
+  address: :11001
+
+
+  
+etcd:
+  address: localhost

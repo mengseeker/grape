@@ -1,0 +1,5 @@
+FROM envoybase
+
+WORKDIR /server
+COPY frontenvoy.yaml front-envoy.yaml
+CMD ["envoy", "-c", "front-envoy.yaml", "--service-cluster", "front-envoy"]

@@ -16,6 +16,18 @@ func main() {
 	var m map[string]interface{}
 
 	for _, v := range m {
-		fmt.Print(v)
+		fmt.Println(v)
 	}
+
+	fmt.Println(CutHttpPath("/aa/fd?"))
+	fmt.Println(CutHttpPath("/?"))
+	fmt.Println(CutHttpPath("/aa"))
+}
+
+func CutHttpPath(rawPath string) string {
+	idx := strings.Index(rawPath, "?")
+	if idx >= 0 {
+		return rawPath[0:idx]
+	}
+	return rawPath
 }

@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"grape/grape/cmd/manage"
-	"grape/grape/cmd/server"
 
 	"github.com/spf13/cobra"
 )
@@ -16,7 +14,7 @@ func NewRootCmd() *cobra.Command {
 			cmd.Usage()
 		},
 	}
-	cmd.AddCommand(server.NewServerCmd())
-	cmd.AddCommand(manage.NewManagerCmd())
+	cmd.AddCommand(NewServerCmd())
+	cmd.AddCommand(NewManagerCmd())
 	return &cmd
 }
