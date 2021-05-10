@@ -1,4 +1,4 @@
-package postgresdb
+package models
 
 import (
 	"log"
@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	dbconn *gorm.DB
+	db *gorm.DB
 )
 
 func Connect(dsn string) error {
@@ -25,12 +25,12 @@ func Connect(dsn string) error {
 			Colorful:                  true,
 		},
 	)
-	dbconn, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
+	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: l,
 	})
 	return err
 }
 
 func GetDB() *gorm.DB {
-	return dbconn
+	return db
 }

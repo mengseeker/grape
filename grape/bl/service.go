@@ -5,10 +5,7 @@ import (
 )
 
 func CreateService(name, code string, port, protocol, external int, note string) models.Service {
-	if external > 0 {
-		external = 1
-	}
-	service := models.Service{
+	record := models.Service{
 		Name:     name,
 		Code:     code,
 		Port:     port,
@@ -16,9 +13,8 @@ func CreateService(name, code string, port, protocol, external int, note string)
 		External: external,
 		Note:     note,
 	}
-	err := db().Create(&service).Error
-	PanicErr(err)
-	return service
+	PanicErr(db().Create(&record).Error)
+	return record
 }
 
 func SearchService(limit, offset int, params gromParam) ([]models.Service, *SearchInfo) {

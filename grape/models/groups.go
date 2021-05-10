@@ -4,6 +4,7 @@ import "time"
 
 // Group is an object representing the database table.
 type Group struct {
+	// record
 	ID          int64  `gorm:"primaryKey" json:"id"`
 	Name        string `gorm:"index;unique;not null;" json:"name"`
 	Code        string `gorm:"index;unique;not null;" json:"code"`

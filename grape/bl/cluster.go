@@ -4,12 +4,14 @@ import (
 	"grape/grape/models"
 )
 
-func CreateCluster(name, address, note string) models.EtcdLink {
-	record := models.EtcdLink{
-		Name:    name,
-		Address: address,
-		Note:    note,
+func CreateCluster(name, code, note, deployType string, etcdLinkID int) models.Cluster {
+	record := models.Cluster{
+		Name:       name,
+		Code:       code,
+		DeployType: deployType,
+		EtcdID:     etcdLinkID,
+		Note:       note,
 	}
-	db().Create(&record)
+	PanicErr(db().Create(&record).Error)
 	return record
 }

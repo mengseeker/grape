@@ -1,6 +1,6 @@
 package bl
 
-import "grape/grape/pkg/postgresdb"
+import "grape/grape/models"
 
 type SearchInfo struct {
 	Page    int    `json:"page"`
@@ -9,7 +9,7 @@ type SearchInfo struct {
 	Order   string `json:"order"`
 }
 
-var db = postgresdb.GetDB
+var db = models.GetDB
 
 type gromParam = map[string]interface{}
 

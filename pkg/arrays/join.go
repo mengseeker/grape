@@ -14,3 +14,16 @@ func JoinInt(a []int, sep string) string {
 	}
 	return string(bs)
 }
+
+func FindStr(a []string, str string) int {
+	for i, val := range a {
+		if val == str {
+			return i
+		}
+	}
+	return -1
+}
+
+func ContainsStr(a []string, str string) bool {
+	return FindStr(a, str) > 0
+}

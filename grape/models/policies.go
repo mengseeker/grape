@@ -4,6 +4,7 @@ import "time"
 
 // Policy is an object representing the database table.
 type Policy struct {
+	// record
 	ID        int64  `gorm:"primaryKey" json:"id"`
 	Category  int    `gorm:"index;not null;" json:"category"`
 	ServiceID int    `gorm:"index;not null;" json:"service_id"`

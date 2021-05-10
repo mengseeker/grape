@@ -10,6 +10,6 @@ func CreateEtcd(name, address, note string) models.EtcdLink {
 		Address: address,
 		Note:    note,
 	}
-	db().Create(&record)
+	PanicErr(db().Create(&record).Error)
 	return record
 }

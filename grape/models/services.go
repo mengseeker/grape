@@ -1,9 +1,20 @@
 package models
 
-import "time"
+import (
+	"errors"
+	"time"
+
+	"gorm.io/gorm"
+)
 
 // Service is an object representing the database table.
+
+var (
+	ErrServiceAttrExternalInvalid = errors.New("ServiceAttrExternalInvalid")
+)
+
 type Service struct {
+	// record
 	ID        int64  `gorm:"primaryKey" json:"id"`
 	Name      string `gorm:"index;unique;not null;" json:"name"`
 	Code      string `gorm:"index;unique;not null;" json:"code"`
@@ -32,4 +43,11 @@ const (
 
 func (o *Service) ProtocolString() string {
 	return ServiceProtocol(o.Protocol).String()
+}
+
+func (r *Service) BeferSave(*gorm.DB) error {
+	if r.External < 0 || r.External > 1 {
+		return ErrServiceAttrExternalInvalid
+	}
+	return nil
 }

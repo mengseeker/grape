@@ -3,7 +3,7 @@ package manage
 import (
 	"fmt"
 	"grape/grape/cmd/server"
-	"grape/grape/pkg/session"
+	"grape/pkg/session"
 
 	"github.com/spf13/cobra"
 	_ "github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-psql/driver"
@@ -14,9 +14,9 @@ func NewSessionCmd() *cobra.Command {
 	var defaultConfigFile = "grape.yaml"
 	var userID int
 	cmd := cobra.Command{
-		Use:   "newsession",
-		Short: "start grape",
-		Long:  `start grape api server`,
+		Use:   "newtoken",
+		Short: "create a login token",
+		Long:  `create a login token`,
 		Run: func(cmd *cobra.Command, args []string) {
 			server.InitConfig(configFile)
 			server.InitRedis()

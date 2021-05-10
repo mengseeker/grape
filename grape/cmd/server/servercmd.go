@@ -2,7 +2,6 @@ package server
 
 import (
 	"grape/grape/models"
-	"grape/grape/pkg/postgresdb"
 	"grape/grape/server"
 	"grape/pkg/redispool"
 
@@ -60,7 +59,7 @@ func InitConfig(cfg string) {
 }
 
 func InitDatabase() {
-	err := postgresdb.Connect(viper.GetString("database"))
+	err := models.Connect(viper.GetString("database"))
 	if err != nil {
 		log.Fatalf("unable to connect db: %v", err)
 	}
@@ -81,7 +80,7 @@ func InitRedis() {
 }
 
 func autoMigrate() {
-	err := postgresdb.GetDB().AutoMigrate(
+	err := models.GetDB().AutoMigrate(
 		&models.Namespace{},
 		&models.EtcdLink{},
 		&models.Cluster{},

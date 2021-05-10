@@ -1,7 +1,7 @@
 package helpers
 
 import (
-	"grape/grape/pkg/session"
+	"grape/pkg/session"
 
 	"github.com/gin-gonic/gin"
 )
