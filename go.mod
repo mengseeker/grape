@@ -15,7 +15,8 @@ require (
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/viper v1.6.3
 	github.com/tidwall/gjson v1.7.5
-	go.uber.org/zap v1.13.0
+	go.etcd.io/etcd/client/v3 v3.5.0-alpha.0
+	go.uber.org/zap v1.16.0
 	golang.org/x/crypto v0.0.0-20210506145944-38f3c27a63bf // indirect
 	golang.org/x/lint v0.0.0-20201208152925-83fdc39ff7b5 // indirect
 	golang.org/x/net v0.0.0-20210508051633-16afe75a6701 // indirect
@@ -26,3 +27,5 @@ require (
 	gorm.io/driver/postgres v1.1.0
 	gorm.io/gorm v1.21.9
 )
+
+replace github.com/envoyproxy/go-control-plane v0.9.8 => github.com/envoyproxy/go-control-plane v0.9.9-0.20201217023817-7fe139bd184a

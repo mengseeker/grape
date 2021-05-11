@@ -29,6 +29,7 @@ services:
           - extauth
     environment:
       - PORT=11001
+      - DEBUG=1
 
 networks:
   envoymesh: {}
