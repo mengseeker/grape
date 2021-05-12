@@ -4,6 +4,7 @@ import (
 	"grape/grape/models"
 	"grape/grape/server"
 	"grape/pkg/redispool"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
@@ -50,6 +51,7 @@ func InitConfig(cfg string) {
 
 	viper.SetConfigFile(cfg)
 	viper.SetEnvPrefix(envPrefix)
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
 	if err := viper.ReadInConfig(); err == nil {
 		log.Infof("Using config file: %s", viper.ConfigFileUsed())

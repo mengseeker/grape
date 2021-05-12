@@ -19,7 +19,6 @@ services:
           - service1
     environment:
       - PORT=8080
-
       
   extauth:
     image: extauth
@@ -30,6 +29,21 @@ services:
     environment:
       - PORT=11001
       - DEBUG=1
+      - GRAPE_ETCD_ADDRESS=etcd:2379
+  etcd:
+    image: etcd
+    networks:
+      envoymesh:
+        aliases:
+          - etcd
+    command:
+      - etcd
+      - --listen-client-urls
+      - http://0.0.0.0:2379
+      - --advertise-client-urls
+      - http://0.0.0.0:2379
+    ports:
+      - "2379:2379"
 
 networks:
   envoymesh: {}

@@ -1,48 +1,28 @@
 package auth
 
 import (
-	"errors"
+	"encoding/json"
+
+	"go.etcd.io/etcd/api/v3/mvccpb"
 )
 
-type AppID int
-type EndpointID int
-
 type App struct {
-	ID          AppID        `json:"id"`
-	APPID       string       `json:"app_id"`
-	APPSec      string       `json:"app_sec"`
-	Username    string       `json:"username"`
-	Endpoints   []EndpointID `json:"endpoints"`
-	Tokens      []string     `json:"tokens"`
-	idxEndpoint map[EndpointID]bool
+	ID        int        `json:"id"`
+	APPID     string     `json:"app_id"`
+	APPSec    string     `json:"app_sec"`
+	Username  string     `json:"username"`
+	Endpoints []Endpoint `json:"endpoints"`
+	// Tokens      []string     `json:"tokens"`
+	idxEndpoint map[Endpoint]bool
 }
 
 // 读多写少，且每次更新时全量更新，不用加锁.
 var (
-	endpints = map[string]EndpointID{}
-	apps     = map[AppID]*App{}
-	tokens   = map[string]AppID{}
+	apps    = map[int]*App{}
+	appKeys = map[string]int{}
 )
 
-var (
-	errUnauthorizedToken    = errors.New("unauthorized token")
-	errUnregisteredEndpoint = errors.New("unregistered endpoint")
-)
-
-// check token then return app
-func GetAppByToken(token string) (*App, error) {
-	id, ok := tokens[token]
-	if !ok {
-		return nil, errUnauthorizedToken
-	}
-	return apps[id], nil
-}
-
-func GetEndpoint(method, path string) EndpointID {
-	return endpints[method+"::"+path]
-}
-
-func (a *App) Auth(endpoint EndpointID) error {
+func (a *App) Auth(endpoint Endpoint) error {
 	if !a.HasEndpoint(endpoint) {
 		return errUnregisteredEndpoint
 	}
@@ -55,6 +35,56 @@ func (a *App) Headers() map[string]string {
 	}
 }
 
-func (a *App) HasEndpoint(endpoint EndpointID) bool {
+func (a *App) HasEndpoint(endpoint Endpoint) bool {
 	return a.idxEndpoint[endpoint]
+}
+
+func (a *App) Marshal() ([]byte, error) {
+	return json.Marshal(a)
+}
+
+func UnmarshalApp(raw []byte) (*App, error) {
+	var a App
+	err := json.Unmarshal(raw, &a)
+	return &a, err
+}
+
+func SetupApp(kv *mvccpb.KeyValue) error {
+	a, err := UnmarshalApp(kv.Value)
+	if err != nil {
+		return err
+	}
+	a.idxEndpoint = map[Endpoint]bool{}
+	for _, end := range a.Endpoints {
+		a.idxEndpoint[end] = true
+		endpints[end] = true
+	}
+	apps[a.ID] = a
+	appKeys[string(kv.Key)] = a.ID
+	buildAppEndpoints()
+	log.Infof("app %s added", a.APPID)
+	return nil
+}
+
+// 删除app、删除app、重新build endpints
+// 对于tokens，由grape server负责删除
+func RemoveApp(kv *mvccpb.KeyValue) error {
+	aid := appKeys[string(kv.Key)]
+	appid := apps[aid].APPID
+	delete(apps, aid)
+	delete(appKeys, string(kv.Key))
+	buildAppEndpoints()
+	log.Infof("app %s removed", appid)
+	return nil
+}
+
+func UpdateApp(kv *mvccpb.KeyValue) error {
+	a, err := UnmarshalApp(kv.Value)
+	if err != nil {
+		return err
+	}
+	apps[a.ID] = a
+	buildAppEndpoints()
+	log.Infof("app %s updated", a.APPID)
+	return nil
 }

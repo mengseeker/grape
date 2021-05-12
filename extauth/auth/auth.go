@@ -14,23 +14,17 @@ var (
 	}
 )
 
-func NeedAuth(method, path string) bool {
-	return GetEndpoint(method, path) > 0
-	// return rand.Int()%2 == 0
-}
-
-func Auth(method, path, token string) (*pb.CheckResponse, error) {
-	endpoint := GetEndpoint(method, path)
+func Auth(endpoint Endpoint, reqID, token string) (*pb.CheckResponse, error) {
 	app, err := GetAppByToken(token)
 	if err != nil {
-		log.Warnf("auth fail: %v(path: %s, token: %s)", err, path, token)
+		log.Warnf("%s %s auth fail: %v (token: %s)", reqID, endpoint, err, token)
 		return FailResponse(err.Error()), nil
 	}
 	if err = app.Auth(endpoint); err != nil {
-		log.Warnf("auth fail: %v(path: %s, token: %s)", err, path, token)
+		log.Warnf("%s %s auth fail: %v (token: %s)", reqID, endpoint, err, token)
 		return FailResponse(err.Error()), nil
 	}
-	log.Debugf("auth ok(path: %s, token: %s)", path, token)
+	log.Debugf("%s %s auth ok (token: %s)", reqID, endpoint, token)
 	authHeaders := app.Headers()
 	resp := pb.CheckResponse{
 		Status: &status.Status{Code: int32(codes.OK)},

@@ -1,6 +1,8 @@
 package etcdcli
 
 import (
+	"context"
+	"grape/pkg/logger"
 	"strings"
 	"time"
 
@@ -17,11 +19,15 @@ func Connect(addrs string) error {
 	cli, err = clientv3.New(clientv3.Config{
 		Endpoints:   ends,
 		DialTimeout: 5 * time.Second,
+		LogConfig:   logger.LoggerCfg(),
 	})
 	if err != nil {
 		return err
 	}
-	return nil
+	ctx, calcel := context.WithTimeout(context.Background(), time.Second*3)
+	defer calcel()
+	_, err = cli.Get(ctx, "test")
+	return err
 }
 
 func Cli() *clientv3.Client {

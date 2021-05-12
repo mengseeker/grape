@@ -7,7 +7,5 @@ redis: :6379
 auth:
   address: :11001
 
-
-  
 etcd:
-  address: localhost
+  address: localhost:2379

@@ -1,27 +1,11 @@
 package main
 
 import (
-	"fmt"
-	"grape/pkg/arrays"
 	"strings"
 )
 
 func main() {
-	clumn := "abc"
-	sval := []string{"a", "b", "c"}
-	ival := []int{1, 2, 3}
-	fmt.Printf("%s in (\"%s\")\n", clumn, strings.Join(sval, "\", \""))
-	fmt.Printf("%s in (%s)\n", clumn, arrays.JoinInt(ival, ","))
-
-	var m map[string]interface{}
-
-	for _, v := range m {
-		fmt.Println(v)
-	}
-
-	fmt.Println(CutHttpPath("/aa/fd?"))
-	fmt.Println(CutHttpPath("/?"))
-	fmt.Println(CutHttpPath("/aa"))
+	// etcdGetAll()
 }
 
 func CutHttpPath(rawPath string) string {
@@ -31,3 +15,15 @@ func CutHttpPath(rawPath string) string {
 	}
 	return rawPath
 }
+
+// func etcdGetAll() {
+// 	err := etcdcli.Connect("127.0.0.1:2379")
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	kvs, err := etcdcli.PrefixAll(context.Background(), "foo")
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	log.Println(kvs)
+// }

@@ -14,16 +14,25 @@ type authServer struct {
 }
 
 func (s *authServer) Check(c context.Context, req *pb.CheckRequest) (*pb.CheckResponse, error) {
-	token := req.Attributes.Request.Http.GetHeaders()["Token"]
+	// token := req.Attributes.Request.Http.GetHeaders()["Token"]
+	// log.Debug(req.Attributes.Request.Http.GetHeaders())
+	token := req.Attributes.Request.Http.GetHeaders()["token"]
+	// reqID := req.Attributes.Request.Http.Id
+	reqID := req.Attributes.Request.Http.GetHeaders()["x-request-id"]
 	path := CutHttpPath(req.Attributes.Request.Http.Path)
 	method := req.Attributes.Request.Http.Method
-	if !NeedAuth(method, path) {
+	endpoint := GetEndpoint(method, path)
+	if !NeedAuth(endpoint) {
+		log.Debugf("%s auth ignored", endpoint)
 		return &OkResp, nil
 	}
-	return Auth(method, path, token)
+	return Auth(endpoint, reqID, token)
 }
 
 func Serve(address string) {
+	initConfig()
+	go watchApp()
+	go watchToken()
 	lis, err := net.Listen("tcp", address)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)

@@ -2,10 +2,8 @@ package logger
 
 import (
 	"os"
-	"sync"
 
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 )
 
 type Logger interface {
@@ -89,9 +87,8 @@ type Logger interface {
 }
 
 var (
-	loggers    = make(map[string]Logger)
-	baseLogger *zap.Logger
-	mux        sync.Mutex
+	loggers = make(map[string]Logger)
+	cfg     *zap.Config
 )
 
 func init() {
@@ -99,17 +96,17 @@ func init() {
 	if os.Getenv("DEBUG") == "1" {
 		level = zap.DebugLevel
 	}
+	c := zap.NewProductionConfig()
+	c.DisableStacktrace = true
+	cfg = &c
+	cfg.Level = zap.NewAtomicLevelAt(level)
+}
 
-	encoderCfg := zap.NewProductionEncoderConfig()
-	encoderCfg.EncodeTime = zapcore.ISO8601TimeEncoder
-	core := zapcore.NewCore(zapcore.NewConsoleEncoder(encoderCfg), os.Stdout, level)
-	baseLogger = zap.New(core, zap.AddCaller())
-	// logger.With(zap.String("app", "xds"))
+func LoggerCfg() *zap.Config {
+	return cfg
 }
 
 func NewLogger(app string) Logger {
-	mux.Lock()
-	defer mux.Unlock()
 	if l, ok := loggers[app]; ok {
 		return l
 	}
@@ -118,5 +115,6 @@ func NewLogger(app string) Logger {
 
 func newLogger(app string) Logger {
 	// return baseLogger.With(zap.String("app", app)).Sugar()
-	return baseLogger.Sugar()
+	l, _ := cfg.Build()
+	return l.Sugar()
 }
