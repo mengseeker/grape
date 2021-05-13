@@ -1,0 +1,16 @@
+FROM golang:1.16 AS build
+ENV GO111MODULE on
+ENV GOPROXY https://goproxy.io
+WORKDIR /goworker
+COPY . .
+
+RUN CGO_ENABLED=0 go build -mod=vendor -a -ldflags '-s' -o grapepilot main.go
+
+FROM alpine AS prod
+WORKDIR /goworker/
+RUN set -eux && sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories &&\
+  apk add -U tzdata && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && apk del tzdata &&\
+  rm -rf /tmp/ /var/cache/apk/
+COPY --from=build /goworker/grapepilot /usr/local/bin/
+
+CMD [ "grapepilot", "s" ]

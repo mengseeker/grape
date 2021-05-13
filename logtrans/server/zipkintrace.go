@@ -1,10 +1,10 @@
 package server
 
 import (
+	"grape/logtrans/server/forward"
+	"grape/logtrans/server/logs"
 	"io/ioutil"
 	"log"
-	"grape/logtrans/server/fluent"
-	"grape/logtrans/server/logs"
 	"net/http"
 )
 
@@ -22,7 +22,7 @@ func zipkinV1Handle(rw http.ResponseWriter, r *http.Request) {
 		log.Printf("read body err: %v", err)
 	}
 	entity := logs.Trace{Log: string(body)}
-	fluent.AddEnvoyTraceLog(&entity)
+	forward.AddEnvoyTraceLog(&entity)
 }
 
 func zipkinV2Handle(rw http.ResponseWriter, r *http.Request) {

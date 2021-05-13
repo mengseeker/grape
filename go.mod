@@ -8,7 +8,6 @@ require (
 	github.com/envoyproxy/protoc-gen-validate v0.6.1 // indirect
 	github.com/gin-gonic/gin v1.7.1
 	github.com/gofrs/uuid v3.2.0+incompatible
-	github.com/golang/protobuf v1.5.2
 	github.com/gomodule/redigo v1.8.4
 	github.com/lib/pq v1.10.1 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
@@ -25,6 +24,7 @@ require (
 	golang.org/x/tools v0.1.0 // indirect
 	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013
 	google.golang.org/grpc v1.35.0-dev
+	google.golang.org/protobuf v1.26.0
 	gorm.io/driver/postgres v1.1.0
 	gorm.io/gorm v1.21.9
 )

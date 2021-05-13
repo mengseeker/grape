@@ -3,6 +3,7 @@ package cmd
 import (
 	"grape/extauth/auth"
 	"grape/pkg/etcdcli"
+	"grape/pkg/share"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -12,7 +13,6 @@ import (
 var (
 	configFile        string
 	defaultConfigFile = "grape.yaml"
-	envPrefix         = "GRAPE"
 )
 
 func NewServerCmd() *cobra.Command {
@@ -25,7 +25,7 @@ func NewServerCmd() *cobra.Command {
 			Serve()
 		},
 	}
-	cmd.Flags().StringVarP(&configFile, "config", "c", defaultConfigFile, "config file (default: "+defaultConfigFile+")")
+	cmd.Flags().StringVarP(&configFile, "config", "c", defaultConfigFile, "config file")
 	return &cmd
 }
 
@@ -46,7 +46,7 @@ func initConfig(cfg string) {
 
 	viper.SetConfigFile(cfg)
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	viper.SetEnvPrefix(envPrefix)
+	viper.SetEnvPrefix(share.ViperEnvPrefix)
 	viper.AutomaticEnv()
 	if err := viper.ReadInConfig(); err == nil {
 		log.Infof("Using config file: %s", viper.ConfigFileUsed())

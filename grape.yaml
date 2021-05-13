@@ -1,11 +1,18 @@
-database: host=localhost dbname=grape user=grape password=grape
-address: :5000
-ginmode: debug
-redis: :6379
-# automigrate: true
+grape:
+  database: host=localhost dbname=grape user=grape password=grape
+  address: :5000
+  ginmode: debug
+  # automigrate: true
+
+  
+redis:
+  address: :6379
 
 auth:
   address: :11001
 
 etcd:
   address: localhost:2379
+
+pilot:
+  address: :15010

@@ -4,6 +4,7 @@ import (
 	"grape/grape/models"
 	"grape/grape/server"
 	"grape/pkg/redispool"
+	"grape/pkg/share"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -14,7 +15,6 @@ import (
 var (
 	configFile        string
 	defaultConfigFile = "grape.yaml"
-	envPrefix         = "GRAPE"
 )
 
 func NewServerCmd() *cobra.Command {
@@ -27,14 +27,15 @@ func NewServerCmd() *cobra.Command {
 			Serve()
 		},
 	}
-	cmd.Flags().StringVarP(&configFile, "config", "c", defaultConfigFile, "config file (default: "+defaultConfigFile+")")
+	cmd.Flags().StringVarP(&configFile, "config", "c", defaultConfigFile, "config file")
+	
 	return &cmd
 }
 
 func Serve() {
 	initServer()
-	gin.SetMode(viper.GetString("ginmode"))
-	server.GetRouter().Run(viper.GetString("address"))
+	gin.SetMode(viper.GetString("grape.ginmode"))
+	server.GetRouter().Run(viper.GetString("grape.address"))
 }
 
 func initServer() {
@@ -44,13 +45,13 @@ func initServer() {
 }
 
 func InitConfig(cfg string) {
-	viper.SetDefault("address", ":5000")
-	viper.SetDefault("redis", ":6379")
-	viper.SetDefault("ginmode", gin.ReleaseMode)
-	viper.SetDefault("automigrate", false)
+	viper.SetDefault("grape.address", ":5000")
+	viper.SetDefault("redis.address", ":6379")
+	viper.SetDefault("grape.ginmode", gin.ReleaseMode)
+	viper.SetDefault("grape.automigrate", false)
 
 	viper.SetConfigFile(cfg)
-	viper.SetEnvPrefix(envPrefix)
+	viper.SetEnvPrefix(share.ViperEnvPrefix)
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
 	if err := viper.ReadInConfig(); err == nil {
@@ -61,7 +62,7 @@ func InitConfig(cfg string) {
 }
 
 func InitDatabase() {
-	err := models.Connect(viper.GetString("database"))
+	err := models.Connect(viper.GetString("grape.database"))
 	if err != nil {
 		log.Fatalf("unable to connect db: %v", err)
 	}
@@ -74,7 +75,7 @@ func InitDatabase() {
 }
 
 func InitRedis() {
-	err := redispool.Connect(viper.GetString("redis"))
+	err := redispool.Connect(viper.GetString("redis.address"))
 	if err != nil {
 		log.Fatalf("unable to connect redis: %v", err)
 	}

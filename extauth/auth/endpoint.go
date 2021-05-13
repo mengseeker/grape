@@ -31,3 +31,4 @@ func buildAppEndpoints() {
 	endpints = newEnds
 	log.Infof("endpoints %v updated", tmps)
 }
+ 

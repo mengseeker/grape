@@ -1,8 +1,8 @@
-package fluent
+package forward
 
 import (
-	"log"
 	"grape/logtrans/server/logs"
+	"log"
 )
 
 func AddEnvoyAccessLog(entity *logs.EnvoyAccessLog) {

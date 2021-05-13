@@ -87,8 +87,9 @@ type Logger interface {
 }
 
 var (
-	loggers = make(map[string]Logger)
-	cfg     *zap.Config
+	// loggers = make(map[string]Logger)
+	cfg *zap.Config
+	log Logger
 )
 
 func init() {
@@ -107,14 +108,16 @@ func LoggerCfg() *zap.Config {
 }
 
 func NewLogger(app string) Logger {
-	if l, ok := loggers[app]; ok {
-		return l
-	}
-	return newLogger(app)
+	// if l, ok := loggers[app]; ok {
+	// 	return l
+	// }
+	return getLogger()
 }
 
-func newLogger(app string) Logger {
-	// return baseLogger.With(zap.String("app", app)).Sugar()
-	l, _ := cfg.Build()
-	return l.Sugar()
+func getLogger() Logger {
+	if log == nil {
+		l, _ := cfg.Build()
+		log = l.Sugar()
+	}
+	return log
 }
