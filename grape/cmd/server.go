@@ -5,7 +5,6 @@ import (
 	"grape/grape/server"
 	"grape/pkg/redispool"
 	"grape/pkg/share"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
@@ -13,8 +12,7 @@ import (
 )
 
 var (
-	configFile        string
-	defaultConfigFile = "grape.yaml"
+	configFile string
 )
 
 func NewServerCmd() *cobra.Command {
@@ -27,8 +25,8 @@ func NewServerCmd() *cobra.Command {
 			Serve()
 		},
 	}
-	cmd.Flags().StringVarP(&configFile, "config", "c", defaultConfigFile, "config file")
-	
+	cmd.Flags().StringVarP(&configFile, "config", "c", share.DefaultCfgFile, "config file")
+
 	return &cmd
 }
 
@@ -50,15 +48,7 @@ func InitConfig(cfg string) {
 	viper.SetDefault("grape.ginmode", gin.ReleaseMode)
 	viper.SetDefault("grape.automigrate", false)
 
-	viper.SetConfigFile(cfg)
-	viper.SetEnvPrefix(share.ViperEnvPrefix)
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	viper.AutomaticEnv()
-	if err := viper.ReadInConfig(); err == nil {
-		log.Infof("Using config file: %s", viper.ConfigFileUsed())
-	} else {
-		log.Fatalf("unable to load config: %v", err)
-	}
+	share.InitConfig(configFile, log)
 }
 
 func InitDatabase() {

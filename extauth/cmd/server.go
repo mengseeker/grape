@@ -4,15 +4,13 @@ import (
 	"grape/extauth/auth"
 	"grape/pkg/etcdcli"
 	"grape/pkg/share"
-	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 var (
-	configFile        string
-	defaultConfigFile = "grape.yaml"
+	configFile string
 )
 
 func NewServerCmd() *cobra.Command {
@@ -25,7 +23,7 @@ func NewServerCmd() *cobra.Command {
 			Serve()
 		},
 	}
-	cmd.Flags().StringVarP(&configFile, "config", "c", defaultConfigFile, "config file")
+	cmd.Flags().StringVarP(&configFile, "config", "c", share.DefaultCfgFile, "config file")
 	return &cmd
 }
 
@@ -44,13 +42,5 @@ func initConfig(cfg string) {
 	viper.SetDefault("auth.address", ":11001")
 	viper.SetDefault("etcd.address", ":6379")
 
-	viper.SetConfigFile(cfg)
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	viper.SetEnvPrefix(share.ViperEnvPrefix)
-	viper.AutomaticEnv()
-	if err := viper.ReadInConfig(); err == nil {
-		log.Infof("Using config file: %s", viper.ConfigFileUsed())
-	} else {
-		log.Fatalf("unable to load config: %v", err)
-	}
+	share.InitConfig(configFile, log)
 }
