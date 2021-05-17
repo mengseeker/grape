@@ -51,3 +51,9 @@ func (r *Service) BeferSave(*gorm.DB) error {
 	}
 	return nil
 }
+
+func (r *Service) Groups() ([]Group, error) {
+	var gs []Group
+	err := db.Model(&gs).Where("service_id = ?", r.ID).Find(&gs).Error
+	return gs, err
+}

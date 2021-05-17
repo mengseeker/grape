@@ -2,6 +2,7 @@ package models
 
 import "time"
 
+
 // EtcdLink is an object representing the database table.
 type EtcdLink struct {
 	// record

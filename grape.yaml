@@ -4,6 +4,7 @@ grape:
   ginmode: debug
   # automigrate: true
 
+cluster_code: dev
   
 redis:
   address: :6379

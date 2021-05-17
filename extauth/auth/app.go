@@ -49,10 +49,11 @@ func UnmarshalApp(raw []byte) (*App, error) {
 	return &a, err
 }
 
-func SetupApp(kv *mvccpb.KeyValue) error {
+func SetupApp(kv *mvccpb.KeyValue) {
 	a, err := UnmarshalApp(kv.Value)
 	if err != nil {
-		return err
+		log.Errorf("setup app UnmarshalApp err: %s", err)
+		return
 	}
 	a.idxEndpoint = map[Endpoint]bool{}
 	for _, end := range a.Endpoints {
@@ -63,28 +64,26 @@ func SetupApp(kv *mvccpb.KeyValue) error {
 	appKeys[string(kv.Key)] = a.ID
 	buildAppEndpoints()
 	log.Infof("app %s added", a.APPID)
-	return nil
 }
 
 // 删除app、删除app、重新build endpints
 // 对于tokens，由grape server负责删除
-func RemoveApp(kv *mvccpb.KeyValue) error {
+func RemoveApp(kv *mvccpb.KeyValue) {
 	aid := appKeys[string(kv.Key)]
 	appid := apps[aid].APPID
 	delete(apps, aid)
 	delete(appKeys, string(kv.Key))
 	buildAppEndpoints()
 	log.Infof("app %s removed", appid)
-	return nil
 }
 
-func UpdateApp(kv *mvccpb.KeyValue) error {
+func UpdateApp(kv *mvccpb.KeyValue) {
 	a, err := UnmarshalApp(kv.Value)
 	if err != nil {
-		return err
+		log.Errorf("update app UnmarshalApp err: %s", err)
+		return
 	}
 	apps[a.ID] = a
 	buildAppEndpoints()
 	log.Infof("app %s updated", a.APPID)
-	return nil
 }

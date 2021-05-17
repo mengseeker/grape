@@ -17,3 +17,30 @@ type Node struct {
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
+
+func (r *Node) Cluster() *Cluster {
+	clu := Cluster{}
+	err := db.First(&clu, r.ClusterID).Error
+	if err != nil {
+		panic(err)
+	}
+	return &clu
+}
+
+func (r *Node) Service() *Service {
+	srv := Service{}
+	err := db.First(&srv, r.ServiceID).Error
+	if err != nil {
+		panic(err)
+	}
+	return &srv
+}
+
+func (r *Node) Group() *Group {
+	g := Group{}
+	err := db.First(&g, r.GroupID).Error
+	if err != nil {
+		panic(err)
+	}
+	return &g
+}

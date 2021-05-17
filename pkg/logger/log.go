@@ -97,7 +97,9 @@ func init() {
 	if os.Getenv("DEBUG") == "1" {
 		level = zap.DebugLevel
 	}
-	c := zap.NewProductionConfig()
+	// c := zap.NewProductionConfig()
+	c := zap.NewDevelopmentConfig()
+	// c.Encoding = "console"
 	c.DisableStacktrace = true
 	cfg = &c
 	cfg.Level = zap.NewAtomicLevelAt(level)

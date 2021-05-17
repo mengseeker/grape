@@ -56,26 +56,20 @@ func UnmarshalToken(raw []byte) (*Token, error) {
 	return &a, err
 }
 
-func SetupToken(kv *mvccpb.KeyValue) error {
+func SetupToken(kv *mvccpb.KeyValue) {
 	t, err := UnmarshalToken(kv.Value)
 	if err != nil {
-		return err
+		log.Errorf("update token UnmarshalApp err: %s", err)
+		return
 	}
 	tokens[t.ID] = t
 	tokenKeys[string(kv.Key)] = t.ID
 	log.Infof("token %s added", t.ID)
-	return nil
 }
 
-func RemoveToken(kv *mvccpb.KeyValue) error {
+func RemoveToken(kv *mvccpb.KeyValue) {
 	tid := tokenKeys[string(kv.Key)]
 	delete(tokenKeys, string(kv.Key))
 	delete(tokens, tid)
 	log.Infof("token %s removed", tid)
-	return nil
-}
-
-func UpdateToken(kv *mvccpb.KeyValue) error {
-	// no way
-	return nil
 }

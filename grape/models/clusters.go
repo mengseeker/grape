@@ -39,3 +39,12 @@ func (r *Cluster) BeferSave(*gorm.DB) error {
 	}
 	return nil
 }
+
+func (r *Cluster) EctdLink() *EtcdLink {
+	link := EtcdLink{}
+	err := db.First(&link, r.EtcdID).Error
+	if err != nil {
+		panic(err)
+	}
+	return &link
+}

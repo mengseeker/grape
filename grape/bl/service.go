@@ -14,6 +14,7 @@ func CreateService(name, code string, port, protocol, external int, note string)
 		Note:     note,
 	}
 	PanicErr(db().Create(&record).Error)
+	SyncServiceConf(&record, false)
 	return record
 }
 
@@ -32,4 +33,11 @@ func SearchService(limit, offset int, params gromParam) ([]models.Service, *Sear
 		Order: order,
 	}
 	return records, searchInfo
+}
+
+func GetServiceClusters(svc *models.Service) []models.Cluster {
+	var cls []models.Cluster
+	idsq := db().Select("cluster_id").Where("service_id = ?", svc.ID).Table(models.TableNameGroup)
+	PanicErr(db().Model(&cls).Where("id in (?)", idsq).Find(&cls).Error)
+	return cls
 }

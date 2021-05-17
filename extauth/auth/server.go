@@ -29,10 +29,10 @@ func (s *authServer) Check(c context.Context, req *pb.CheckRequest) (*pb.CheckRe
 	return Auth(endpoint, reqID, token)
 }
 
-func Serve(address string) {
-	initConfig()
-	go watchApp()
-	go watchToken()
+func Serve(address, clusterCode string) {
+	initConfig(clusterCode)
+	go watchApp(clusterCode)
+	go watchToken(clusterCode)
 	lis, err := net.Listen("tcp", address)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)

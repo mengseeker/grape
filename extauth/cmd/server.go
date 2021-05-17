@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"grape/extauth/auth"
-	"grape/pkg/etcdcli"
 	"grape/pkg/share"
 
 	"github.com/spf13/cobra"
@@ -29,13 +28,17 @@ func NewServerCmd() *cobra.Command {
 
 func Serve() {
 	initConfig(configFile)
-	err := etcdcli.Connect(viper.GetString("etcd.address"))
+	err := auth.ConnectEtcd(viper.GetString("etcd.address"))
 	if err != nil {
 		log.Fatalf("connect to ectd err: %v", err)
 	}
 	log.Info("etcd cluster connected")
 	// TODO etcd
-	auth.Serve(viper.GetString("auth.address"))
+	clusterCode := viper.GetString("cluster_code")
+	if clusterCode == "" {
+		log.Fatal("clusterCode must setting")
+	}
+	auth.Serve(viper.GetString("auth.address"), clusterCode)
 }
 
 func initConfig(cfg string) {
