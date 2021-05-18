@@ -11,7 +11,9 @@
       "mode": "debug",
       "program": "${workspaceFolder}/grape/main.go",
       "args": [
-        "s"
+        "s",
+        "-c",
+        "${workspaceFolder}/grape.yaml"
       ]
     }
 

@@ -24,6 +24,10 @@ type Service struct {
 	Note      string `gorm:"not null;default:'';" json:"note"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
+
+	F_Groups   []Group  `gorm:"foreignKey:ServiceID" json:"-"`
+	F_Nodes    []Node   `gorm:"foreignKey:ServiceID" json:"-"`
+	F_Policies []Policy `gorm:"foreignKey:ServiceID" json:"-"`
 }
 
 type ServiceProtocol int
@@ -52,8 +56,18 @@ func (r *Service) BeferSave(*gorm.DB) error {
 	return nil
 }
 
-func (r *Service) Groups() ([]Group, error) {
-	var gs []Group
-	err := db.Model(&gs).Where("service_id = ?", r.ID).Find(&gs).Error
-	return gs, err
+func (r *Service) Groups() []Group {
+	if r.F_Groups != nil {
+		return r.F_Groups
+	}
+	PanicErr(db.Model(r).Association("F_Groups").Find(&r.F_Groups))
+	return r.F_Groups
+}
+
+func (r *Service) Policies() []Policy {
+	if r.F_Policies != nil {
+		return r.F_Policies
+	}
+	PanicErr(db.Model(r).Association("F_Policies").Find(&r.F_Policies))
+	return r.F_Policies
 }

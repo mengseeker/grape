@@ -1,11 +1,14 @@
 package main
 
 import (
+	"grape/grape/models"
 	"strings"
+	"unsafe"
 )
 
 func main() {
-	// etcdGetAll()
+	println(unsafe.Sizeof(models.Group{}))
+	println(unsafe.Sizeof(int(1)))
 }
 
 func CutHttpPath(rawPath string) string {

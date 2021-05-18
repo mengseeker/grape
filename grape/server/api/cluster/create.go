@@ -14,7 +14,7 @@ func create(c *gin.Context) {
 	name := jp.RequireStr("name")
 	code := jp.RequireStr("code")
 	deployType := jp.RequireStr("deploy_type")
-	etcdLinkID := jp.RequireInt("etcd_link")
+	etcdLinkID := int64(jp.RequireInt("etcd_link"))
 	note := jp.OptionalStr("note", "")
 
 	redislocker.LockP("lock_grape_create_cluster_"+s.ID, 0, func() {

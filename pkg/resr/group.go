@@ -16,12 +16,11 @@ type Group struct {
 	Nodes       []string `json:"nodes"`
 }
 
-func NewGroup(source *models.Group) *Group {
+func NewGroup(svc *Service, source *models.Group) *Group {
 	return &Group{
 		ID:          source.ID,
 		Name:        source.Name,
-		ServiceCode: source.Service().Code,
-		DeployType:  source.DeployType,
+		ServiceCode: svc.Code,
 		Nodes:       source.NodeIPs(),
 	}
 }

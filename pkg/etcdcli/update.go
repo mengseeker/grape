@@ -2,19 +2,26 @@ package etcdcli
 
 import (
 	"context"
-	"reflect"
+	"crypto/md5"
+	"encoding/hex"
+)
+
+var (
+	versions = map[string]string{}
 )
 
 func (cli *Client) CheckAndUpdate(ctx context.Context, k string, val []byte) error {
-	old, err := cli.Cli.Get(ctx, k)
-	if err != nil {
-		return err
+	newVersion := HashVersion(val)
+	publishedVersion := versions[k]
+	if newVersion == publishedVersion {
+		return nil
 	}
-	if old.Count == 1 {
-		if reflect.DeepEqual(old.Kvs[0], val) {
-			return nil
-		}
-	}
-	_, err = cli.Cli.Put(ctx, k, string(val))
+	versions[k] = newVersion
+	_, err := cli.Cli.Put(ctx, k, string(val))
 	return err
+}
+
+func HashVersion(val []byte) string {
+	dst := md5.Sum(val)
+	return hex.EncodeToString(dst[:])
 }

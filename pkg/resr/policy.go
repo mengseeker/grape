@@ -15,12 +15,12 @@ type Policy struct {
 	Options     map[string]interface{} `json:"options"`
 }
 
-func NewPolicy(source *models.Policy) *Policy {
+func NewPolicy(svc *Service, source *models.Policy) *Policy {
 	return &Policy{
 		ID:          source.ID,
 		Code:        source.Code,
 		Category:    source.Category,
-		ServiceCode: source.Service().Code,
+		ServiceCode: svc.Code,
 		Options:     source.OptionsMap(),
 	}
 }

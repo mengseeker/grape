@@ -27,12 +27,13 @@ type Cluster struct {
 	Name       string `gorm:"index;unique;not null;" json:"name"`
 	Code       string `gorm:"index;unique;not null;" json:"code"`
 	DeployType string `gorm:"not null;" json:"deploy_type"`
-	EtcdID     int    `gorm:"not null;" json:"etcd_id"`
+	EtcdID     int64  `gorm:"not null;" json:"etcd_id"`
 	Note       string `gorm:"not null;default:''" json:"note"`
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 
-	F_Etcd EtcdLink `gorm:"foreignKey:EtcdID" json:"-"`
+	F_Etcd       *EtcdLink   `gorm:"foreignKey:EtcdID" json:"-"`
+	F_Namespaces []Namespace `gorm:"foreignKey:ClusterID" json:"-"`
 }
 
 func (r *Cluster) BeferSave(*gorm.DB) error {
@@ -43,10 +44,9 @@ func (r *Cluster) BeferSave(*gorm.DB) error {
 }
 
 func (r *Cluster) EctdLink() *EtcdLink {
-	link := EtcdLink{}
-	err := db.First(&link, r.EtcdID).Error
-	if err != nil {
-		panic(err)
+	if r.F_Etcd != nil {
+		return r.F_Etcd
 	}
-	return &link
+	PanicErr(db.Model(r).Association("F_Etcd").Find(&r.F_Etcd))
+	return r.F_Etcd
 }

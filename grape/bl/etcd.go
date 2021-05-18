@@ -7,19 +7,31 @@ import (
 )
 
 func SyncServiceConf(r *models.Service, del bool) {
+	groups := r.Groups()
+	ids := []int64{}
+	for _, g := range groups {
+		ids = append(ids, g.ID)
+	}
+	PanicErr(db().Model(groups).Preload("F_Nodes").Find(&groups, ids).Error)
+
+	ps := r.Policies()
+	rs := resr.NewService(r)
 	for _, clu := range GetServiceClusters(r) {
-		syncConf(&clu, resr.NewService(r), del)
+		syncConf(&clu, rs, del)
+		syncGroupConf(&clu, rs, groups, del)
+		syncPolicyConf(&clu, rs, ps, del)
 	}
 }
 
-func SyncGroupConf(r *models.Group, del bool) {
-	syncConf(r.Cluster(), resr.NewGroup(r), del)
+func syncGroupConf(clu *models.Cluster, svc *resr.Service, rs []models.Group, del bool) {
+	for _, r := range rs {
+		syncConf(clu, resr.NewGroup(svc, &r), del)
+	}
 }
 
-func SyncPolicyConf(r *models.Policy, del bool) {
-	svc := r.Service()
-	for _, clu := range GetServiceClusters(svc) {
-		syncConf(&clu, resr.NewPolicy(r), del)
+func syncPolicyConf(clu *models.Cluster, svc *resr.Service, rs []models.Policy, del bool) {
+	for _, r := range rs {
+		syncConf(clu, resr.NewPolicy(svc, &r), del)
 	}
 }
 

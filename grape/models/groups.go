@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 // Group is an object representing the database table.
 type Group struct {
@@ -10,44 +12,46 @@ type Group struct {
 	Code        string `gorm:"index;unique;not null;" json:"code"`
 	Version     string `gorm:"not null;default:'';" json:"version"`
 	Lang        string `gorm:"not null;default:'';" json:"lang"`
-	NamespaceID int    `gorm:"index;not null;" json:"namespace_id"`
-	ServiceID   int    `gorm:"index;not null;" json:"service_id"`
-	ClusterID   int    `gorm:"index;not null;" json:"cluster_id"`
-	DeployType  int    `gorm:"not null;" json:"deploy_type"`
+	NamespaceID int64  `gorm:"index;not null;" json:"namespace_id"`
+	ServiceID   int64  `gorm:"index;not null;" json:"service_id"`
+	ClusterID   int64  `gorm:"index;not null;" json:"cluster_id"`
 	Note        string `gorm:"not null;default:'';" json:"note"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 
-	F_Service Service `gorm:"foreignKey:ServiceID" json:"-"`
-	F_Cluster Cluster `gorm:"foreignKey:ClusterID" json:"-"`
+	F_Namespace *Namespace `gorm:"foreignKey:NamespaceID" json:"-"`
+	F_Service   *Service   `gorm:"foreignKey:ServiceID" json:"-"`
+	F_Cluster   *Cluster   `gorm:"foreignKey:ClusterID" json:"-"`
+	F_Nodes     []Node     `gorm:"foreignKey:GroupID" json:"-"`
 }
 
 func (r *Group) Cluster() *Cluster {
-	clu := Cluster{}
-	err := db.First(&clu, r.ClusterID).Error
-	if err != nil {
-		panic(err)
+	if r.F_Cluster != nil {
+		return r.F_Cluster
 	}
-	return &clu
+	PanicErr(db.Model(r).Association("F_Cluster").Find(&r.F_Cluster))
+	return r.F_Cluster
 }
 
 func (r *Group) Service() *Service {
-	srv := Service{}
-	err := db.First(&srv, r.ServiceID).Error
-	if err != nil {
-		panic(err)
+	if r.F_Service != nil {
+		return r.F_Service
 	}
-	return &srv
+	PanicErr(db.Model(r).Association("F_Service").Find(&r.F_Service))
+	return r.F_Service
+}
+
+func (r *Group) Nodes() []Node {
+	if r.F_Nodes != nil {
+		return r.F_Nodes
+	}
+	PanicErr(db.Model(r).Association("F_Nodes").Find(&r.F_Nodes))
+	return r.F_Nodes
 }
 
 func (r *Group) NodeIPs() []string {
-	var nodes []Node
-	err := db.Model(&nodes).Where("group_id = ?", r.ID).Find(&nodes)
-	if err != nil {
-		panic(err)
-	}
 	ips := []string{}
-	for _, n := range nodes {
+	for _, n := range r.Nodes() {
 		ips = append(ips, n.IP)
 	}
 	return ips

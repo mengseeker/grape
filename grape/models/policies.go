@@ -11,24 +11,23 @@ type Policy struct {
 	ID        int64  `gorm:"primaryKey" json:"id"`
 	Code      string `gorm:"index;unique;not null;" json:"code"`
 	Category  int    `gorm:"index;not null;" json:"category"`
-	ServiceID int    `gorm:"index;not null;" json:"service_id"`
-	Active    int    `gorm:"index;not null;default:1" json:"active"`
+	ServiceID int64  `gorm:"index;not null;" json:"service_id"`
+	Active    bool   `gorm:"index;not null;default:true" json:"active"`
 	Options   string `gorm:"not null;default:'{}'" json:"options"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 
-	F_Service Service `gorm:"foreignKey:ServiceID" json:"-"`
+	F_Service *Service `gorm:"foreignKey:ServiceID" json:"-"`
 
 	options map[string]interface{}
 }
 
 func (r *Policy) Service() *Service {
-	srv := Service{}
-	err := db.First(&srv, r.ServiceID).Error
-	if err != nil {
-		panic(err)
+	if r.F_Service != nil {
+		return r.F_Service
 	}
-	return &srv
+	PanicErr(db.Model(r).Association("F_Group").Find(&r.F_Service))
+	return r.F_Service
 }
 
 func (r *Policy) OptionsMap() map[string]interface{} {

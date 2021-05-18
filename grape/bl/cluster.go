@@ -4,7 +4,7 @@ import (
 	"grape/grape/models"
 )
 
-func CreateCluster(name, code, note, deployType string, etcdLinkID int) models.Cluster {
+func CreateCluster(name, code, note, deployType string, etcdLinkID int64) models.Cluster {
 	record := models.Cluster{
 		Name:       name,
 		Code:       code,

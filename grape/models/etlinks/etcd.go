@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	links map[int64]*etcdcli.Client
+	links = map[int64]*etcdcli.Client{}
 )
 
 func AddLink(link *models.EtcdLink) error {
@@ -20,7 +20,7 @@ func AddLink(link *models.EtcdLink) error {
 }
 
 func GetCli(clu *models.Cluster) *etcdcli.Client {
-	cli, exists := links[clu.ID]
+	cli, exists := links[int64(clu.EtcdID)]
 	if exists {
 		return cli
 	}
@@ -28,5 +28,5 @@ func GetCli(clu *models.Cluster) *etcdcli.Client {
 	if err != nil {
 		panic(fmt.Errorf("can not get link :%v", err))
 	}
-	return links[clu.ID]
+	return links[int64(clu.EtcdID)]
 }
