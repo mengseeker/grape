@@ -1,6 +1,7 @@
-package helpers
+package h
 
 import (
+	"fmt"
 	"grape/pkg/session"
 
 	"github.com/gin-gonic/gin"
@@ -23,6 +24,9 @@ func Auth(c *gin.Context) {
 }
 
 func GetSession(c *gin.Context) *session.Session {
-	val, _ := c.Get("session")
+	val, exists := c.Get("session")
+	if !exists {
+		panic(fmt.Errorf("session not found, use auth first"))
+	}
 	return val.(*session.Session)
 }

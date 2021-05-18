@@ -13,11 +13,13 @@ type Group struct {
 	NamespaceID int    `gorm:"index;not null;" json:"namespace_id"`
 	ServiceID   int    `gorm:"index;not null;" json:"service_id"`
 	ClusterID   int    `gorm:"index;not null;" json:"cluster_id"`
-	// Replicas    int    `gorm:"not null;default:1" json:"replicas"`
-	DeployType int    `gorm:"not null;" json:"deploy_type"`
-	Note       string `gorm:"not null;default:'';" json:"note"`
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
+	DeployType  int    `gorm:"not null;" json:"deploy_type"`
+	Note        string `gorm:"not null;default:'';" json:"note"`
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+
+	F_Service Service `gorm:"foreignKey:ServiceID" json:"-"`
+	F_Cluster Cluster `gorm:"foreignKey:ClusterID" json:"-"`
 }
 
 func (r *Group) Cluster() *Cluster {

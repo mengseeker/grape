@@ -31,6 +31,8 @@ type Cluster struct {
 	Note       string `gorm:"not null;default:''" json:"note"`
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
+
+	F_Etcd EtcdLink `gorm:"foreignKey:EtcdID" json:"-"`
 }
 
 func (r *Cluster) BeferSave(*gorm.DB) error {

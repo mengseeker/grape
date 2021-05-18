@@ -16,6 +16,10 @@ type Node struct {
 	State       int    `gorm:"not null;" json:"state" toml:"state" yaml:"state"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
+
+	F_Service Service `gorm:"foreignKey:ServiceID" json:"-"`
+	F_Cluster Cluster `gorm:"foreignKey:ClusterID" json:"-"`
+	F_Group   Group   `gorm:"foreignKey:GroupID" json:"-"`
 }
 
 func (r *Node) Cluster() *Cluster {

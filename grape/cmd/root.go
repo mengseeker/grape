@@ -1,7 +1,6 @@
 package cmd
 
 import (
-
 	"github.com/spf13/cobra"
 )
 
@@ -16,5 +15,6 @@ func NewRootCmd() *cobra.Command {
 	}
 	cmd.AddCommand(NewServerCmd())
 	cmd.AddCommand(NewManagerCmd())
+	cmd.AddCommand(NewMigrateCmd())
 	return &cmd
 }

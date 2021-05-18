@@ -1,4 +1,4 @@
-package helpers
+package h
 
 import (
 	"fmt"
@@ -33,4 +33,20 @@ func (j *JsonBody) RequireStr(key string) string {
 		panic(fmt.Errorf("param %s is required", key))
 	}
 	return r.String()
+}
+
+func (j *JsonBody) OptionalInt(key string, defalutVal int) int {
+	r := j.jr.Get(key)
+	if !r.Exists() {
+		return defalutVal
+	}
+	return int(r.Int())
+}
+
+func (j *JsonBody) RequireInt(key string) int {
+	r := j.jr.Get(key)
+	if !r.Exists() {
+		panic(fmt.Errorf("param %s is required", key))
+	}
+	return int(r.Int())
 }

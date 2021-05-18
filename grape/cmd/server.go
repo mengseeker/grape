@@ -46,7 +46,7 @@ func InitConfig(cfg string) {
 	viper.SetDefault("grape.address", ":5000")
 	viper.SetDefault("redis.address", ":6379")
 	viper.SetDefault("grape.ginmode", gin.ReleaseMode)
-	viper.SetDefault("grape.automigrate", false)
+	// viper.SetDefault("grape.automigrate", false)
 
 	share.InitConfig(configFile, log)
 }
@@ -55,10 +55,6 @@ func InitDatabase() {
 	err := models.Connect(viper.GetString("grape.database"))
 	if err != nil {
 		log.Fatalf("unable to connect db: %v", err)
-	}
-
-	if viper.GetBool("automigrate") {
-		autoMigrate()
 	}
 
 	log.Infof("database connected!")
@@ -70,20 +66,4 @@ func InitRedis() {
 		log.Fatalf("unable to connect redis: %v", err)
 	}
 	log.Infof("redis connected!")
-}
-
-func autoMigrate() {
-	err := models.GetDB().AutoMigrate(
-		&models.Namespace{},
-		&models.EtcdLink{},
-		&models.Cluster{},
-		&models.Service{},
-		&models.Group{},
-		&models.Node{},
-		&models.Policy{},
-		&models.User{},
-	)
-	if err != nil {
-		log.Fatalf("automigrate err: %v", err)
-	}
 }

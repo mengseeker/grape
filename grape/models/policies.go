@@ -17,6 +17,8 @@ type Policy struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 
+	F_Service Service `gorm:"foreignKey:ServiceID" json:"-"`
+
 	options map[string]interface{}
 }
 

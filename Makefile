@@ -1,7 +1,9 @@
-.PHONY: build protobuf builddocker
+.PHONY: build
 
 build:
-	echo '~~~~~~~~~~~~~~~~~~'
+	go build -o build/grape grape/main.go
+	go build -o build/extauth extauth/main.go
+	go build -o build/pilot pilot/main.go
 
 updatedist:
 	rm -rf grape/server/ui/static/*
