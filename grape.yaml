@@ -1,10 +1,9 @@
+cluster_code: dev
 grape:
   database: host=localhost dbname=grape user=grape password=grape
   address: :5000
   ginmode: debug
 
-cluster_code: dev
-  
 redis:
   address: :6379
 

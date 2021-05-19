@@ -9,15 +9,15 @@ updatedist:
 	rm -rf grape/server/ui/static/*
 	cp -r ../grapeui/dist/* grape/server/ui/static/
 
-build-logtrans:
+dockerbuild-logtrans:
 	go build && docker build -t logtrans .
 
-build-envoybase:
+dockerbuild-envoybase:
 	cd test/envoybase &&\
 	docker build -t envoybase .
 
 # extauth
-build-extauth:
+dockerbuild-extauth:
 	docker build -t extauth -f docker/Dockerfile.extauth .
 
 dockercompose-extauth:
