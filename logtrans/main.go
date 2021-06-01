@@ -1,9 +1,15 @@
 package main
 
-import "grape/logtrans/server"
+import (
+	"grape/logtrans/cmd"
+	"grape/pkg/logger"
+)
+
+var log = logger.NewLogger("logtrans")
 
 func main() {
-	go server.ServeAccessLog(":9412")
-	go server.ServeZikpin(":9411")
-	<-make(chan int)
+	err := cmd.NewRootCmd().Execute()
+	if err != nil {
+		log.Fatal(err)
+	}
 }

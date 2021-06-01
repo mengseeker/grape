@@ -15,3 +15,14 @@ etcd:
 
 pilot:
   address: :15010
+
+logtrans:
+  es: elasticsearch:9200
+  influxdb: influxdb:8086
+  kafka: kafka.nxmc:9092
+  kafka_group_es: logtrans_group_es
+  kafka_group_influxdb: logtrans_group_influxdb
+  kafka_topic: nxmc.logs
+  kafka_verbose: false
+  kafka_assignor: range # Consumer group partition assignment strategy (range, roundrobin, sticky)
+  consumer_num: 1

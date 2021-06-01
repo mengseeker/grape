@@ -10,7 +10,10 @@ updatedist:
 	cp -r ../grapeui/dist/* grape/server/ui/static/
 
 dockerbuild-logtrans:
-	go build && docker build -t logtrans .
+	docker build -f docker/Dockerfile.logtrans -t repo.nexttao.com.cn/mc/logtrans .
+
+dockerpush-logtrans:
+	docker push repo.nexttao.com.cn/mc/logtrans
 
 dockerbuild-envoybase:
 	cd test/envoybase &&\
