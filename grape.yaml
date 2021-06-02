@@ -1,4 +1,5 @@
-cluster_code: dev
+cluster_code: k8s
+environment_code: nx-dev
 grape:
   database: host=localhost dbname=grape user=grape password=grape
   address: :5000
@@ -17,12 +18,21 @@ pilot:
   address: :15010
 
 logtrans:
-  es: elasticsearch:9200
-  influxdb: influxdb:8086
-  kafka: kafka.nxmc:9092
-  kafka_group_es: logtrans_group_es
-  kafka_group_influxdb: logtrans_group_influxdb
-  kafka_topic: nxmc.logs
-  kafka_verbose: false
-  kafka_assignor: range # Consumer group partition assignment strategy (range, roundrobin, sticky)
-  consumer_num: 1
+  es:
+    address: elasticsearch:9200
+    batch_size: 100
+    interval: 3
+    consumer_num: 1
+  influxdb:
+    address: influxdb:8086
+    batch_size: 100
+    interval: 3
+    consumer_num: 1
+  kafka:
+    address: kafka.nxmc:9092
+    group_es: logtrans_group_es
+    group_influxdb: logtrans_group_influxdb
+    topic: nxmc.logs
+    verbose: false
+    assignor: range # (range, roundrobin, sticky)
+  

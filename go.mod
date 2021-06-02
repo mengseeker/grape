@@ -3,7 +3,6 @@ module grape
 go 1.16
 
 require (
-	github.com/DataDog/zstd v1.3.5 // indirect
 	github.com/Shopify/sarama v1.29.0
 	github.com/cncf/udpa/go v0.0.0-20210322005330-6414d713912e // indirect
 	github.com/envoyproxy/go-control-plane v0.9.8
@@ -11,8 +10,10 @@ require (
 	github.com/gin-gonic/gin v1.7.1
 	github.com/gofrs/uuid v3.2.0+incompatible
 	github.com/gomodule/redigo v1.8.4
+	github.com/influxdata/influxdb1-client v0.0.0-20191209144304-8bf82d3c094d
 	github.com/klauspost/compress v1.12.3 // indirect
 	github.com/lib/pq v1.10.1 // indirect
+	github.com/olivere/elastic/v7 v7.0.24
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/viper v1.6.3
@@ -28,6 +29,7 @@ require (
 	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013
 	google.golang.org/grpc v1.35.0-dev
 	google.golang.org/protobuf v1.26.0
+	gopkg.in/yaml.v2 v2.3.0 // indirect
 	gorm.io/driver/postgres v1.1.0
 	gorm.io/gorm v1.21.9
 )

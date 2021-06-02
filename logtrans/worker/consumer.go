@@ -13,8 +13,6 @@ import (
 	"github.com/Shopify/sarama"
 )
 
-type Runner func(*Message) error
-
 type Consumer interface {
 	Run()
 	Stop()
@@ -23,10 +21,10 @@ type Consumer interface {
 type Message = sarama.ConsumerMessage
 
 type kafkaConsumer struct {
-	Name   string
-	topic  string
-	log    logger.Logger
-	runner Runner
+	Name    string
+	topic   string
+	log     logger.Logger
+	consume Consume
 
 	consumerGroup sarama.ConsumerGroup
 	ctx           context.Context
@@ -35,7 +33,7 @@ type kafkaConsumer struct {
 }
 
 func NewKafkaConsumer(brokers, assignor, group, name, topic, version string,
-	runner Runner, log logger.Logger) (*kafkaConsumer, error) {
+	consume Consume, log logger.Logger) (*kafkaConsumer, error) {
 
 	c := new(kafkaConsumer)
 	config := sarama.NewConfig()
@@ -58,7 +56,7 @@ func NewKafkaConsumer(brokers, assignor, group, name, topic, version string,
 	default:
 		return nil, fmt.Errorf("unrecognized consumer group partition assignor: %s", assignor)
 	}
-	config.Consumer.Offsets.Initial = sarama.OffsetOldest
+	// config.Consumer.Offsets.Initial = sarama.OffsetOldest
 	c.ready = make(chan bool)
 
 	c.ctx, c.cancel = context.WithCancel(context.Background())
@@ -66,15 +64,8 @@ func NewKafkaConsumer(brokers, assignor, group, name, topic, version string,
 	if err != nil {
 		return nil, fmt.Errorf("creating consumer group client: %v", err)
 	}
-
-	c.runner = func(m *Message) (err error) {
-		defer func() {
-			if e := recover(); e != nil {
-				err = fmt.Errorf("deal message paniced: %v", e)
-			}
-		}()
-		err = runner(m)
-		return
+	if consume != nil {
+		c.consume = consume
 	}
 	c.consumerGroup = client
 	c.log = log
@@ -83,7 +74,7 @@ func NewKafkaConsumer(brokers, assignor, group, name, topic, version string,
 }
 
 func (c *kafkaConsumer) Run() {
-	if c.runner == nil {
+	if c.consume == nil {
 		return
 	}
 	wg := &sync.WaitGroup{}
@@ -132,11 +123,17 @@ func (c *kafkaConsumer) Cleanup(sarama.ConsumerGroupSession) error {
 // ConsumeClaim must start a consumer loop of ConsumerGroupClaim's Messages().
 func (c *kafkaConsumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for message := range claim.Messages() {
-		err := c.runner(message)
-		if err != nil {
-			c.log.Errorf("consumer(%s) message(%s) err: %v", c.Name, string(message.Value), err)
-		}
+		c.consume(message)
 		session.MarkMessage(message, "")
 	}
 	return nil
+}
+
+func FindHeader(hs []*sarama.RecordHeader, key string) string {
+	for _, h := range hs {
+		if string(h.Key) == key {
+			return string(h.Value)
+		}
+	}
+	return ""
 }
