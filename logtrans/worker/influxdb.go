@@ -9,6 +9,10 @@ import (
 	influxdb "github.com/influxdata/influxdb1-client/v2"
 )
 
+var (
+	InfluxRemoveFields = [...]string{"agent", "access_time"}
+)
+
 type InfClient struct {
 	ClusterCode     string
 	EnvironmentCode string
@@ -88,6 +92,10 @@ func (e *InfClient) BuildPoint(m *Message) *influxdb.Point {
 	tags["cluster_code"] = e.ClusterCode
 
 	fields["namespace_code"] = e.EnvironmentCode
+
+	for _, f := range InfluxRemoveFields {
+		delete(fields, f)
+	}
 
 	point, err := influxdb.NewPoint(influxMeasurement, tags, fields, timestamp)
 	if err != nil {
