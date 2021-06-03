@@ -17,7 +17,7 @@ type EnvoyAccess struct {
 	Status        string `json:"status"`
 	ReqSize       uint64 `json:"req_size"`
 	ResSize       int64  `json:"res_size"`
-	Traffic       string `json:"traffic"`
+	Traffic       int    `json:"traffic"`
 	RequestTime   int64  `json:"request_time"`
 	Agent         string `json:"agent"`
 	ResponseFlags string `json:"response_flags"`

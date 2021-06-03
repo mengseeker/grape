@@ -19,12 +19,12 @@ pilot:
 
 logtrans:
   es:
-    address: elasticsearch:9200
+    address: http://127.0.0.1:9200
     batch_size: 100
     interval: 3
     consumer_num: 1
   influxdb:
-    address: influxdb:8086
+    address: http://influxdb:8086
     batch_size: 100
     interval: 3
     consumer_num: 1
@@ -35,4 +35,3 @@ logtrans:
     topic: nxmc.logs
     verbose: false
     assignor: range # (range, roundrobin, sticky)
-  

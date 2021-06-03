@@ -1,12 +1,16 @@
 package cmd
 
 import (
+	"context"
 	"grape/logtrans/worker"
 	"grape/pkg/share"
 	stdlog "log"
 	"os"
+	"os/signal"
 	"strconv"
 	"sync"
+	"syscall"
+	"time"
 
 	"github.com/Shopify/sarama"
 	"github.com/spf13/cobra"
@@ -49,13 +53,25 @@ func initConfig(configFile string) {
 }
 
 func RunConsumers() {
-	RunEsConsumers()
-	RunInfluxdbConsumers()
+	ctx, cancel := context.WithCancel(context.Background())
+	RunEsConsumers(ctx)
+	RunInfluxdbConsumers(ctx)
+
+	go func() {
+		sigterm := make(chan os.Signal, 1)
+		signal.Notify(sigterm, syscall.SIGINT, syscall.SIGTERM)
+		<-sigterm
+		log.Warn("terminating: via signal")
+		cancel()
+		<-time.After(10 * time.Second)
+		log.Warnf("timeout for quit, force exit...")
+		syscall.Exit(1)
+	}()
 
 	wg.Wait()
 }
 
-func RunEsConsumers() {
+func RunEsConsumers(ctx context.Context) {
 	consumer_num := viper.GetInt("logtrans.es.consumer_num")
 	kafka := viper.GetString("logtrans.kafka.address")
 	es := viper.GetString("logtrans.es.address")
@@ -68,56 +84,52 @@ func RunEsConsumers() {
 	batchSize := viper.GetInt("logtrans.es.batch_size")
 	interval := viper.GetInt("logtrans.es.interval")
 
+	wg.Add(consumer_num)
 	for i := 0; i < consumer_num; i++ {
 		consumerName := "logtrans_es_" + strconv.FormatInt(int64(i), 10)
 		esClient, err := worker.NewEsClient(es, env, cluster, log)
 		if err != nil {
 			log.Fatalf("connect elasticsearch err: %v", err)
 		}
-		runner := worker.NewRunner(esClient, batchSize, interval)
+		runner := worker.NewRunner(esClient, batchSize, interval, log)
 		consumer, err := worker.NewKafkaConsumer(
-			kafka, assignor, esGroup, consumerName, topic, version,
-			runner.NewConsume(), log,
+			kafka, assignor, esGroup, consumerName, topic, version, log,
 		)
 		if err != nil {
 			log.Fatalf("faild to create kafka consumer, err: %v", err)
 		}
-		wg.Add(2)
-		go func() { runner.RefreshLoop() }()
-		go func() { defer wg.Done(); consumer.Run() }()
+		go func() { defer wg.Done(); consumer.Run(runner, ctx) }()
 	}
 
 }
 
-func RunInfluxdbConsumers() {
+func RunInfluxdbConsumers(ctx context.Context) {
 	consumer_num := viper.GetInt("logtrans.influxdb.consumer_num")
 	kafka := viper.GetString("logtrans.kafka.address")
 	influx := viper.GetString("logtrans.influxdb.address")
 	influxGroup := viper.GetString("logtrans.kafka.group_influxdb")
 	topic := viper.GetString("logtrans.kafka.topic")
-	version := viper.GetString("logtrans.kakfa_.version")
+	version := viper.GetString("logtrans.kakfa.version")
 	assignor := viper.GetString("logtrans.kafka.assignor")
 	env := viper.GetString("environment_code")
 	cluster := viper.GetString("cluster_code")
 	batchSize := viper.GetInt("logtrans.influxdb.batch_size")
 	interval := viper.GetInt("logtrans.influxdb.interval")
 
+	wg.Add(consumer_num)
 	for i := 0; i < consumer_num; i++ {
 		consumerName := "logtrans_influxdb_" + strconv.FormatInt(int64(i), 10)
 		infClient, err := worker.NewInfClient(influx, env, cluster, log)
 		if err != nil {
 			log.Fatalf("connect influxdb err: %v", err)
 		}
-		runner := worker.NewRunner(infClient, batchSize, interval)
+		runner := worker.NewRunner(infClient, batchSize, interval, log)
 		consumer, err := worker.NewKafkaConsumer(
-			kafka, assignor, influxGroup, consumerName, topic, version,
-			runner.NewConsume(), log,
+			kafka, assignor, influxGroup, consumerName, topic, version, log,
 		)
 		if err != nil {
 			log.Fatalf("faild to create kafka consumer, err: %v", err)
 		}
-		wg.Add(2)
-		go func() { runner.RefreshLoop() }()
-		go func() { defer wg.Done(); consumer.Run() }()
+		go func() { defer wg.Done(); consumer.Run(runner, ctx) }()
 	}
 }
