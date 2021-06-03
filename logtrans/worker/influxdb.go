@@ -3,6 +3,7 @@ package worker
 import (
 	"encoding/json"
 	"grape/pkg/logger"
+	"strconv"
 	"time"
 
 	_ "github.com/influxdata/influxdb1-client"
@@ -10,7 +11,8 @@ import (
 )
 
 var (
-	InfluxRemoveFields = [...]string{"agent", "access_time"}
+	InfluxRemoveFields = [...]string{"agent", "access_time", "code"}
+	stringTags         = [...]string{"path", "gateway_kind", "method", "health_level", "health_level", "cr_service_code", "sr_service_code", "app_id"}
 )
 
 type InfClient struct {
@@ -92,6 +94,15 @@ func (e *InfClient) BuildPoint(m *Message) *influxdb.Point {
 	tags["cluster_code"] = e.ClusterCode
 
 	fields["namespace_code"] = e.EnvironmentCode
+
+	tags["code"] = strconv.FormatInt(int64(fields["code"].(float64)), 10)
+
+	for _, t := range stringTags {
+		if v, ok := fields[t]; ok {
+			tags[t] = v.(string)
+			delete(fields, t)
+		}
+	}
 
 	for _, f := range InfluxRemoveFields {
 		delete(fields, f)
