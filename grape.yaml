@@ -1,5 +1,6 @@
 cluster_code: k8s
 environment_code: nx-dev
+logging_level: debug
 grape:
   database: host=localhost dbname=grape user=grape password=grape
   address: :5000

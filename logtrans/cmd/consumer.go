@@ -89,14 +89,14 @@ func RunEsConsumers(ctx context.Context) {
 		consumerName := "logtrans_es_" + strconv.FormatInt(int64(i), 10)
 		esClient, err := worker.NewEsClient(es, env, cluster, log)
 		if err != nil {
-			log.Fatalf("connect elasticsearch err: %v", err)
+			log.Fatalf("faild to connecting elasticsearch: %v", err)
 		}
 		runner := worker.NewRunner(esClient, batchSize, interval, log)
 		consumer, err := worker.NewKafkaConsumer(
 			kafka, assignor, esGroup, consumerName, topic, version, log,
 		)
 		if err != nil {
-			log.Fatalf("faild to create kafka consumer, err: %v", err)
+			log.Fatalf("faild to create kafka consumer: %v", err)
 		}
 		go func() { defer wg.Done(); consumer.Run(runner, ctx) }()
 	}

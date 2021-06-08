@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 type Logger interface {
@@ -103,6 +104,10 @@ func init() {
 	c.DisableStacktrace = true
 	cfg = &c
 	cfg.Level = zap.NewAtomicLevelAt(level)
+}
+
+func SetLevel(l zapcore.Level) {
+	cfg.Level.SetLevel(l)
 }
 
 func LoggerCfg() *zap.Config {
