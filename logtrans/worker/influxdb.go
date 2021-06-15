@@ -66,16 +66,18 @@ func (e *InfClient) Write(ms []*Message) {
 		e.l.Errorf("can not create influxdb batchPoints: %v", err)
 		return
 	}
+	count := 0
 	for _, m := range ms {
 		if GetLogType(m) == logTypeEnvoyAccess {
 			bs.AddPoint(e.BuildPoint(m))
+			count++
 		}
 	}
 	err = e.infCli.Write(bs)
 	if err != nil {
 		e.l.Errorf("faild to write to influxdb: %v", err)
 	} else {
-		e.l.Debugf("write logs to influxdb %d", len(ms))
+		e.l.Debugf("write logs to influxdb count: %d", count)
 	}
 }
 

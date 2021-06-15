@@ -53,14 +53,17 @@ func (e *EsClient) Write(ms []*Message) {
 	bulk := e.esCli.Bulk()
 	var data interface{}
 	var index = unKnowIndex
+	count := 0
 	for _, m := range ms {
 		logType := GetLogType(m)
 		if logType == logTypeEnvoyAccess {
 			data = e.dealEnvoyAccessLog(m)
 			index = envoyIndex
+			count++
 		} else if logType == logTypeTrace {
 			data = e.dealTraceLog(m)
 			index = traceIndex
+			count++
 		} else {
 			e.l.Warnf("logType %s undefined", logType)
 			data = map[string]string{"raw": string(m.Value)}
@@ -78,7 +81,7 @@ func (e *EsClient) Write(ms []*Message) {
 	if err != nil {
 		e.l.Errorf("write logs to es err: %v", err)
 	} else {
-		e.l.Debugf("write logs to es %d", len(ms))
+		e.l.Debugf("write logs to elasticsearch count: %d", count)
 	}
 }
 
