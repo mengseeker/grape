@@ -122,6 +122,7 @@ func (e *EsClient) dealEnvoyAccessLog(m *Message) *logs.EnvoyAccess {
 		}
 	}
 	data.Timestamp /= 1000
+	data.Timestamp1 = data.Timestamp
 	return data
 }
 

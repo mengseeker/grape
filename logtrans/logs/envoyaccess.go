@@ -7,6 +7,7 @@ const (
 type EnvoyAccess struct {
 	UUID        string `json:"uuid"`
 	Timestamp   int64  `json:"timestamp"`
+	Timestamp1  int64  `json:"@timestamp"`
 	Kind        string `json:"kind"`
 	GatewayKind string `json:"gateway_kind"`
 	GatewayCode string `json:"gateway_code"`

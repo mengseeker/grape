@@ -69,8 +69,11 @@ func (e *InfClient) Write(ms []*Message) {
 	count := 0
 	for _, m := range ms {
 		if GetLogType(m) == logTypeEnvoyAccess {
-			bs.AddPoint(e.BuildPoint(m))
-			count++
+			point := e.BuildPoint(m)
+			if point != nil {
+				bs.AddPoint(point)
+				count++
+			}
 		}
 	}
 	err = e.infCli.Write(bs)
@@ -88,6 +91,7 @@ func (e *InfClient) BuildPoint(m *Message) *influxdb.Point {
 	if err != nil {
 		e.l.Error(string(m.Value))
 		e.l.Errorf("unmarshal envoyAccess log err: %v", err)
+		return nil
 	}
 	accessTime := int64(fields["timestamp"].(float64))
 	timestamp := time.Unix(accessTime/1000_000, e.GetNextID(accessTime))
