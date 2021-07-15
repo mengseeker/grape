@@ -1,0 +1,26 @@
+// syntax = "proto3";
+
+// package grape.api;
+
+// import "google/protobuf/descriptor.proto";
+
+// option go_package = "grape/api";
+
+// [#protodoc-title: Resource]
+
+// enum ResourceType {
+//   SERVICE = 0;
+//   POLICY = 1;
+//   DEPLOY = 2;
+// }
+
+// // Magic number in this file derived from top 28bit of SHA256 digest of "grape.annotation.resource".
+// extend google.protobuf.MessageOptions {
+//   ResourceAnnotation resource = 175894469;
+// }
+
+// message ResourceAnnotation {
+//   // Annotation for xDS services that indicates the fully-qualified Protobuf type for the resource
+//   // type.
+//   ResourceType type = 1;
+// }

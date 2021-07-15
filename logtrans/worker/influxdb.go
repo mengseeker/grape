@@ -13,6 +13,9 @@ import (
 var (
 	InfluxRemoveFields = [...]string{"agent", "access_time", "code"}
 	stringTags         = [...]string{"path", "gateway_kind", "method", "health_level", "health_level", "cr_service_code", "sr_service_code", "app_id"}
+	allKeys            = map[string]bool{
+		"access_time": true, "kind": true, "gateway_kind": true, "gateway_code": true, "response_flags": true, "timestamp": true, "remote": true, "local": true, "method": true, "path": true, "code": true, "status": true, "req_size": true, "res_size": true, "traffic": true, "request_time": true, "referer": true, "agent": true, "forwoad": true, "request": true, "response": true, "uuid": true, "app_id": true, "health_level": true, "cr_service_code": true, "sr_service_code": true, "cr_group_code": true, "sr_group_code": true, "upstream_host": true, "upstream_cluster": true,
+	}
 )
 
 type InfClient struct {
@@ -92,6 +95,13 @@ func (e *InfClient) BuildPoint(m *Message) *influxdb.Point {
 		e.l.Error(string(m.Value))
 		e.l.Errorf("unmarshal envoyAccess log err: %v", err)
 		return nil
+	}
+	// 存在一些异常日志数据，导致influxdb fields非常多
+	// 这里将只保留正常的字段
+	for key := range fields {
+		if !allKeys[key] {
+			delete(fields, key)
+		}
 	}
 	accessTime := int64(fields["timestamp"].(float64))
 	timestamp := time.Unix(accessTime/1000_000, e.GetNextID(accessTime))

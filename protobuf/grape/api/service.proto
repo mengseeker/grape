@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+// import "google/protobuf/any.proto";
+// import "grape/api/annotations.proto";
+
+package grape.api;
+option go_package = "grape/api";
+
+message Service {
+  // option (resource).type = "api.grape.service";
+  string name = 1;
+  string namespace = 3;
+  enum Protocol {
+    HTTP = 0;
+    HTTPS = 1;
+    HTTP2 = 2;
+    TCP = 3;
+    UDP = 4;
+    TLS = 5;
+    GRPC = 6;
+  }
+  Protocol service_protocol = 4;
+
+  repeated string deploy_group = 5;
+  repeated string policy = 6;
+}

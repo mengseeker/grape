@@ -8,7 +8,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-const DefaultCfgFile = "grape.yaml"
+const DefaultCfgFile = "bootstrap.yaml"
 
 func InitConfig(cfgFile string, log logger.Logger) {
 	viper.SetConfigFile(cfgFile)
