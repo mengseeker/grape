@@ -3,30 +3,27 @@ package worker
 import (
 	"context"
 	"fmt"
+	"grape/logtrans/logs"
 	"grape/pkg/logger"
 	"strings"
-	"sync"
 
 	"github.com/Shopify/sarama"
 )
 
-type Message = sarama.ConsumerMessage
-
 type kafkaConsumer struct {
-	Name    string
-	topic   string
-	log     logger.Logger
-	consume Consume
+	Name   string
+	topics string
+	log    logger.Logger
+	rec    logs.Receiver
 
 	consumerGroup sarama.ConsumerGroup
 }
 
-func NewKafkaConsumer(brokers, assignor, group, name, topic, version string, log logger.Logger) (*kafkaConsumer, error) {
-
+func NewKafkaConsumer(brokers, assignor, group, name, topics, version string, log logger.Logger) (*kafkaConsumer, error) {
 	c := new(kafkaConsumer)
 	config := sarama.NewConfig()
 
-	c.topic = topic
+	c.topics = topics
 	config.ClientID = name
 	c.Name = name
 	var err error
@@ -55,21 +52,13 @@ func NewKafkaConsumer(brokers, assignor, group, name, topic, version string, log
 	return c, nil
 }
 
-func (c *kafkaConsumer) Run(r Runner, ctx context.Context) {
-	if r == nil {
+func (c *kafkaConsumer) Run(rec logs.Receiver, ctx context.Context) {
+	if rec == nil {
 		return
 	}
-	c.consume = r.NewConsume()
-	// 启动runner
-	runCtx, runCancel := context.WithCancel(context.Background())
-	runWg := sync.WaitGroup{}
-	runWg.Add(1)
-	go func() {
-		defer runWg.Done()
-		r.RefreshLoop(runCtx)
-	}()
+	c.rec = rec
 	for {
-		if err := c.consumerGroup.Consume(ctx, strings.Split(c.topic, ","), c); err != nil {
+		if err := c.consumerGroup.Consume(ctx, strings.Split(c.topics, ","), c); err != nil {
 			c.log.Errorf("consumer: %v", err)
 		}
 		if ctx.Err() != nil {
@@ -77,11 +66,10 @@ func (c *kafkaConsumer) Run(r Runner, ctx context.Context) {
 		}
 	}
 
+	c.log.Infof("kafka consumer %q closing...", c.Name)
 	if err := c.consumerGroup.Close(); err != nil {
 		c.log.Fatalf("Error closing client: %v", err)
 	}
-	runCancel()
-	runWg.Wait()
 }
 
 func (c *kafkaConsumer) Setup(sarama.ConsumerGroupSession) error {
@@ -96,7 +84,10 @@ func (c *kafkaConsumer) Cleanup(sarama.ConsumerGroupSession) error {
 // ConsumeClaim must start a consumer loop of ConsumerGroupClaim's Messages().
 func (c *kafkaConsumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for message := range claim.Messages() {
-		c.consume(message)
+		c.rec.Receive(logs.Message{
+			MessageType: message.Topic,
+			Val:         message.Value,
+		})
 		session.MarkMessage(message, "")
 	}
 	return nil

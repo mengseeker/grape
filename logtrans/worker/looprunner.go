@@ -2,6 +2,7 @@ package worker
 
 import (
 	"context"
+	"grape/logtrans/logs"
 	"grape/pkg/logger"
 	"time"
 )
@@ -11,15 +12,10 @@ const (
 	defaultInterval     = 3
 )
 
-type Consume func(*Message)
+type Message = logs.Message
 
 type Writer interface {
-	Write([]*Message)
-}
-
-type Runner interface {
-	NewConsume() Consume
-	RefreshLoop(context.Context)
+	Write([]Message)
 }
 
 type runner struct {
@@ -27,7 +23,7 @@ type runner struct {
 	BatchMaxSize int
 	Interval     time.Duration
 
-	cache chan *Message
+	cache chan Message
 	l     logger.Logger
 }
 
@@ -43,19 +39,17 @@ func NewRunner(w Writer, batchMaxSize, interval int, l logger.Logger) *runner {
 		BatchMaxSize: batchMaxSize,
 		Interval:     time.Second * time.Duration(interval),
 
-		cache: make(chan *Message),
+		cache: make(chan Message),
 		l:     l,
 	}
 }
 
-func (r *runner) NewConsume() Consume {
-	return func(m *Message) {
-		r.cache <- m
-	}
+func (r *runner) Receive(msg Message) {
+	r.cache <- msg
 }
 
 func (r *runner) RefreshLoop(ctx context.Context) {
-	buf := make([]*Message, 0, r.BatchMaxSize)
+	buf := make([]Message, 0, r.BatchMaxSize)
 	tk := time.NewTicker(r.Interval)
 	defer tk.Stop()
 	for {

@@ -40,7 +40,7 @@ func NewEsClient(addr, env, cluster string, l logger.Logger) (*EsClient, error) 
 	return es, nil
 }
 
-func (e *EsClient) Write(ms []*Message) {
+func (e *EsClient) Write(ms []Message) {
 	defer func() {
 		if rerr := recover(); rerr != nil {
 			e.l.Errorf("write message to es panic: %v", rerr)
@@ -55,18 +55,18 @@ func (e *EsClient) Write(ms []*Message) {
 	var index = unKnowIndex
 	count := 0
 	for _, m := range ms {
-		logType := GetLogType(m)
-		if logType == logTypeEnvoyAccess {
-			data = e.dealEnvoyAccessLog(m)
+		switch m.MessageType {
+		case logs.LogTypeEnvoyAccess:
+			data = e.dealEnvoyAccessLog(&m)
 			index = envoyIndex
 			count++
-		} else if logType == logTypeTrace {
-			data = e.dealTraceLog(m)
+		case logs.LogTypeTrace:
+			data = e.dealTraceLog(&m)
 			index = traceIndex
 			count++
-		} else {
-			e.l.Warnf("logType %s undefined", logType)
-			data = map[string]string{"raw": string(m.Value)}
+		default:
+			e.l.Warnf("logType %s undefined", m.MessageType)
+			data = map[string]string{"raw": string(m.Val)}
 		}
 		bulk.Add(
 			elastic.NewBulkCreateRequest().
@@ -105,9 +105,9 @@ func (e *EsClient) GetEsIndex() (string, string) {
 
 func (e *EsClient) dealEnvoyAccessLog(m *Message) *logs.EnvoyAccess {
 	data := new(logs.EnvoyAccess)
-	err := json.Unmarshal(m.Value, data)
+	err := json.Unmarshal(m.Val, data)
 	if err != nil {
-		e.l.Error(string(m.Value))
+		e.l.Error(string(m.Val))
 		e.l.Errorf("unmarshal envoyAccess log err: %v", err)
 	}
 	data.Tenant = e.EnvironmentCode
@@ -128,9 +128,9 @@ func (e *EsClient) dealEnvoyAccessLog(m *Message) *logs.EnvoyAccess {
 
 func (e *EsClient) dealTraceLog(m *Message) *logs.Trace {
 	data := new(logs.Trace)
-	err := json.Unmarshal(m.Value, data)
+	err := json.Unmarshal(m.Val, data)
 	if err != nil {
-		e.l.Error(string(m.Value))
+		e.l.Error(string(m.Val))
 		e.l.Errorf("unmarshal Trace log err: %v", err)
 	}
 	data.Tenant = e.EnvironmentCode

@@ -48,7 +48,7 @@ func NewInfClient(addr, env, cluster string, l logger.Logger) (*InfClient, error
 	return cli, nil
 }
 
-func (e *InfClient) Write(ms []*Message) {
+func (e *InfClient) Write(ms []Message) {
 	defer func() {
 		if rerr := recover(); rerr != nil {
 			e.l.Errorf("write message to influxdb panic: %v", rerr)
@@ -71,12 +71,10 @@ func (e *InfClient) Write(ms []*Message) {
 	}
 	count := 0
 	for _, m := range ms {
-		if GetLogType(m) == logTypeEnvoyAccess {
-			point := e.BuildPoint(m)
-			if point != nil {
-				bs.AddPoint(point)
-				count++
-			}
+		point := e.BuildPoint(&m)
+		if point != nil {
+			bs.AddPoint(point)
+			count++
 		}
 	}
 	err = e.infCli.Write(bs)
@@ -90,9 +88,9 @@ func (e *InfClient) Write(ms []*Message) {
 func (e *InfClient) BuildPoint(m *Message) *influxdb.Point {
 	var tags = make(map[string]string, 8)
 	var fields = make(map[string]interface{}, 8)
-	err := json.Unmarshal(m.Value, &fields)
+	err := json.Unmarshal(m.Val, &fields)
 	if err != nil {
-		e.l.Error(string(m.Value))
+		e.l.Error(string(m.Val))
 		e.l.Errorf("unmarshal envoyAccess log err: %v", err)
 		return nil
 	}

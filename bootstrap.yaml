@@ -20,20 +20,23 @@ pilot:
   address: :15010
 
 logtrans:
-  es:
-    address: http://127.0.0.1:9200
-    batch_size: 100
-    interval: 3
-    consumer_num: 1
-  influxdb:
-    address: http://influxdb:8086
-    batch_size: 100
-    interval: 3
-    consumer_num: 1
-  kafka:
-    address: kafka.nxmc:9092
-    group_es: logtrans_group_es
-    group_influxdb: logtrans_group_influxdb
-    topic: nxmc.logs
-    verbose: false
-    assignor: range # (range, roundrobin, sticky)
+  source:
+    kafka:
+      address: 127.0.0.1:9092
+      group: logtrans
+      topics: "nxmc.trace,nxmc.envoy_access"
+      assignor: range
+  out:
+    es:
+      address: http://127.0.0.1:9200
+      batch_size: 100
+      interval: 3
+      types:
+        - "nxmc.trace"
+        - "nxmc.envoy_access"
+    influxdb:
+      address: http://127.0.0.1:8086
+      batch_size: 100
+      interval: 3
+      types:
+        - "nxmc.envoy_access"

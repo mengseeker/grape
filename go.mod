@@ -13,7 +13,7 @@ require (
 	github.com/influxdata/influxdb1-client v0.0.0-20191209144304-8bf82d3c094d
 	github.com/klauspost/compress v1.12.3 // indirect
 	github.com/lib/pq v1.10.1 // indirect
-	github.com/olivere/elastic/v7 v7.0.24
+	github.com/olivere/elastic/v7 v7.0.26
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/viper v1.6.3
