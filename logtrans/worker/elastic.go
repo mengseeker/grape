@@ -105,9 +105,9 @@ func (e *EsClient) GetEsIndex() (string, string) {
 
 func (e *EsClient) dealEnvoyAccessLog(m *Message) *logs.EnvoyAccess {
 	data := new(logs.EnvoyAccess)
-	err := json.Unmarshal(m.Val, data)
+	err := json.Unmarshal(m.GetLog(), data)
 	if err != nil {
-		e.l.Error(string(m.Val))
+		e.l.Error(string(m.GetLog()))
 		e.l.Errorf("unmarshal envoyAccess log err: %v", err)
 	}
 	data.Tenant = e.EnvironmentCode

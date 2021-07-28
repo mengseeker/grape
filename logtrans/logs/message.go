@@ -10,15 +10,6 @@ type Message struct {
 	Val         []byte
 }
 
-type Receiver interface {
-	Receive(msg Message)
-}
-
-type Distributor interface {
-	Distribute(types []string, rec Receiver)
-}
-
-type Transmitter interface {
-	Receiver
-	Distributor
+func (m *Message) GetLog() []byte {
+	return GetFluentBitMessageLog(m)
 }

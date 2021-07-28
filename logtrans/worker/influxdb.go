@@ -88,7 +88,7 @@ func (e *InfClient) Write(ms []Message) {
 func (e *InfClient) BuildPoint(m *Message) *influxdb.Point {
 	var tags = make(map[string]string, 8)
 	var fields = make(map[string]interface{}, 8)
-	err := json.Unmarshal(m.Val, &fields)
+	err := json.Unmarshal(m.GetLog(), &fields)
 	if err != nil {
 		e.l.Error(string(m.Val))
 		e.l.Errorf("unmarshal envoyAccess log err: %v", err)

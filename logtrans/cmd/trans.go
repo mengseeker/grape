@@ -43,7 +43,7 @@ func initConfig(configFile string) {
 
 func Run() {
 	ctx, cancel := context.WithCancel(context.Background())
-	var tran logs.Transmitter
+	tran := logs.NewWatchTransmitter()
 	HandleSource(tran, ctx)
 	RunConsumer(tran, ctx)
 
