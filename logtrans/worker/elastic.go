@@ -128,7 +128,7 @@ func (e *EsClient) dealEnvoyAccessLog(m *Message) *logs.EnvoyAccess {
 
 func (e *EsClient) dealTraceLog(m *Message) *logs.Trace {
 	data := new(logs.Trace)
-	err := json.Unmarshal(m.Val, data)
+	err := json.Unmarshal(m.GetLog(), data)
 	if err != nil {
 		e.l.Error(string(m.Val))
 		e.l.Errorf("unmarshal Trace log err: %v", err)

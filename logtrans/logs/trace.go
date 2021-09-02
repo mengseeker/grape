@@ -1,7 +1,7 @@
 package logs
 
 const (
-	// IndexTraceMapping = ``
+// IndexTraceMapping = ``
 )
 
 type Trace struct {

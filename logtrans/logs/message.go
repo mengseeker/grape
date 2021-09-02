@@ -1,7 +1,7 @@
 package logs
 
 const (
-	LogTypeEnvoyAccess = "nxmc.envoy_access"
+	LogTypeEnvoyAccess = "nxmc.envoyaccess"
 	LogTypeTrace       = "nxmc.trace"
 )
 
