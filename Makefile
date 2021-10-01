@@ -8,13 +8,9 @@ buildall:
 
 .PHONY: protobuf
 protobuf:
-	protoc \
-		--go_out=../ \
-		--go_opt=paths=source_relative \
-		--proto_path=./protobuf/ \
-		--go-grpc_out=../ \
-		--go-grpc_opt=paths=source_relative \
-		protobuf/grape/api/*.proto
+	cd .. && protoc -I=. --go_out=. --go-grpc_out=. \
+		--go-grpc_opt=paths=source_relative --go_opt=paths=source_relative \
+		grape/api/**/*.proto
 
 
 .PHONY: generate

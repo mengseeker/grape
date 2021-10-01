@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+// import "google/protobuf/any.proto";
+// import "grape/api/annotations.proto";
+import "grape/api/core/common.proto";
+
+package grape.api.core;
+option go_package = "grape/api/core";
+
+
+message DeployGroup {
+  // option (resource).type = "api.grape.deplsoy_group";
+  string name = 1;
+
+  repeated Node nodes = 5;
+}
