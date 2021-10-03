@@ -29,7 +29,7 @@ func (cli *Client) WatchPrefixEvents(
 	log logger.Logger,
 	CreateHandle, UpdateHandle, RemoveHandle EventHandle,
 ) {
-	log.Infof("watching %s", key)
+	log.Infof("watching prefix %s", key)
 	cli.WatchPrefix(ctx, key, func(resp *clientv3.WatchResponse) {
 		err := resp.Err()
 		if err != nil {

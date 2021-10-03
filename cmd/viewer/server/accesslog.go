@@ -1,9 +1,9 @@
 package server
 
 import (
+	"grape/internal/share"
 	"grape/logtrans/server/forward"
 	"grape/logtrans/server/logs"
-	"grape/pkg/share"
 	"log"
 	"net"
 	"strings"

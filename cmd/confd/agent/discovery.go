@@ -3,6 +3,7 @@ package agent
 import (
 	"context"
 	"grape/api/confd"
+	"grape/internal/iutils"
 	"time"
 
 	"google.golang.org/grpc"
@@ -24,14 +25,11 @@ func DiscoveryConfig(ctx context.Context) <-chan *confd.Configs {
 	timeout := time.After(loadTimeout)
 	cfChan := make(chan *confd.Configs)
 	go func() {
-		if config.discoveryAddress == "" {
-			log.Fatal("discoveryAddress must be set")
-		}
 		// dial and get config
 		var err error
 		dialTimeout, cancel := context.WithTimeout(ctx, time.Second*3)
 		defer cancel()
-		disconveryConn, err = grpc.DialContext(dialTimeout, config.discoveryAddress)
+		disconveryConn, err = grpc.DialContext(dialTimeout, config.discoveryAddress, grpc.WithInsecure())
 		if err != nil {
 			log.Fatalf("unable to connect to discovery server: %v", err)
 		}
@@ -42,6 +40,7 @@ func DiscoveryConfig(ctx context.Context) <-chan *confd.Configs {
 	case <-timeout:
 		log.Fatal("timeout to load configs")
 	case <-ready:
+		log.Infof("discovery server %s connected", config.discoveryAddress)
 		break
 	}
 	return cfChan
@@ -64,7 +63,11 @@ func handleDiscovery(ctx context.Context, cfs chan<- *confd.Configs) {
 func discoveryStream(ctx context.Context, cfs chan<- *confd.Configs) error {
 	streamCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	disconveryStream, err := disconveryClient.StreamResources(streamCtx, &confd.Discovery{})
+	discovery := &confd.Discovery{
+		Service: config.service,
+		Node:    iutils.GetNode(),
+	}
+	disconveryStream, err := disconveryClient.StreamResources(streamCtx, discovery)
 	if err != nil {
 		return err
 	}
@@ -74,6 +77,7 @@ func discoveryStream(ctx context.Context, cfs chan<- *confd.Configs) error {
 			// disconveryStream.CloseSend()
 			return err
 		}
+		// TODO 防抖处理
 		cfs <- cf
 	}
 }

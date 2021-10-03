@@ -1,11 +1,5 @@
-cluster_code: k8s
-environment_code: nx-dev
+cluster_code: dev
 logging_level: debug
-grape:
-  database: host=localhost dbname=grape user=grape password=grape
-  api_address: :5000
-  mcp_address: :15010
-  ginmode: debug
 
 redis:
   address: :6379
@@ -16,27 +10,5 @@ auth:
 etcd:
   address: localhost:2379
 
-pilot:
+discovery:
   address: :15010
-
-logtrans:
-  source:
-    kafka:
-      address: 127.0.0.1:9092
-      group: logtrans
-      topics: "nxmc.trace,nxmc.envoy_access"
-      assignor: range
-  out:
-    es:
-      address: http://127.0.0.1:9200
-      batch_size: 100
-      interval: 3
-      types:
-        - "nxmc.trace"
-        - "nxmc.envoy_access"
-    influxdb:
-      address: http://127.0.0.1:8086
-      batch_size: 100
-      interval: 3
-      types:
-        - "nxmc.envoy_access"

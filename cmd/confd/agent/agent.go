@@ -2,8 +2,8 @@ package agent
 
 import (
 	"context"
+	"grape/internal/share"
 	"grape/pkg/logger"
-	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -28,30 +28,36 @@ func NewAgentCmd() *cobra.Command {
 			start()
 		},
 	}
-	cmd.PersistentFlags().StringVarP(&config.discoveryAddress, "discoveryAddress", "d", "", "discoveryAddress($DiscoveryAddress)")
-	cmd.PersistentFlags().StringVarP(&config.service, "service", "s", "", "service($Namespace/$ServiceCode)")
-	cmd.PersistentFlags().StringVarP(&config.run, "run", "r", "", "application run command($Run)")
+	cmd.PersistentFlags().StringVarP(&config.discoveryAddress, "discoveryAddress", "d", "", "discoveryAddress")
+	cmd.PersistentFlags().StringVarP(&config.service, "service", "s", "", "service")
+	cmd.PersistentFlags().StringVarP(&config.run, "run", "r", "", "application run command")
 	return &cmd
 }
 
 // if command args is nil, load config from env
 func loadEnvConfig() {
 	if config.discoveryAddress == "" {
-		config.discoveryAddress = os.Getenv("DiscoveryAddress")
+		config.discoveryAddress = share.GetDiscoveryAddress()
 	}
 	if config.run == "" {
-		config.run = os.Getenv("Run")
+		config.run = share.GetRun()
 	}
 	if config.service == "" {
-		ns := os.Getenv("Namespace")
-		serviceCode := os.Getenv("ServiceCode")
-		if ns != "" && serviceCode != "" {
-			config.service = ns + "/" + serviceCode
-		}
+		config.service = share.GetService()
+	}
+}
+
+func checkfigure() {
+	if config.service == "" {
+		log.Fatalf("service not configued")
+	}
+	if config.discoveryAddress == "" {
+		log.Fatal("discoveryAddress must be set")
 	}
 }
 
 func start() {
+	checkfigure()
 	ctx := context.Background()
 	ch := DiscoveryConfig(ctx)
 	handleApplication(ctx, ch)

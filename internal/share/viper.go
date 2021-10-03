@@ -36,11 +36,6 @@ func InitConfig(cfgFile string, log logger.Logger) {
 
 }
 
-// todo 去掉环境
-func GetEnvironment() string {
-	return viper.GetString("environment_code")
-}
-
 func GetCluster() string {
 	return viper.GetString("cluster_code")
 }

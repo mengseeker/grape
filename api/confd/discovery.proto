@@ -6,9 +6,8 @@ package grape.api.confd;
 option go_package = "grape/api/confd";
 
 message Discovery {
-  string server = 1;
-  string host = 2;
-  core.Node node = 3;
+  string service = 1;
+  core.Node node = 2;
 }
 
 message FileConfig {

@@ -1,8 +1,8 @@
-package main
+package manage
 
 import "github.com/spf13/cobra"
 
-func NewManageCmd() *cobra.Command {
+func NewCmd() *cobra.Command {
 	cmd := cobra.Command{
 		Use:     "manage",
 		Aliases: []string{"m"},

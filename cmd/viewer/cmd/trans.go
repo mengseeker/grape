@@ -3,10 +3,10 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"grape/internal/share"
 	"grape/logtrans/cmd/config"
 	"grape/logtrans/logs"
 	"grape/logtrans/worker"
-	"grape/pkg/share"
 	"grape/pkg/util"
 	stdlog "log"
 	"os"

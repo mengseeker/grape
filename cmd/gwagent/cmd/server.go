@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"grape/extauth/auth"
-	"grape/pkg/share"
+	"grape/internal/share"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

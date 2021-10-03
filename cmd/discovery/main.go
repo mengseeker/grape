@@ -1,6 +1,8 @@
 package main
 
 import (
+	"grape/cmd/discovery/manage"
+	"grape/cmd/discovery/server"
 	"grape/pkg/logger"
 
 	"github.com/spf13/cobra"
@@ -22,8 +24,8 @@ func main() {
 		},
 	}
 
-	root.AddCommand(NewServerCmd())
-	root.AddCommand(NewManageCmd())
+	root.AddCommand(server.NewCmd())
+	root.AddCommand(manage.NewCmd())
 	if err := root.Execute(); err != nil {
 		log.Fatal(err)
 	}

@@ -4,7 +4,7 @@ package auth
 
 import (
 	"context"
-	"grape/pkg/share"
+	"grape/internal/share"
 	"time"
 
 	"go.etcd.io/etcd/api/v3/mvccpb"
