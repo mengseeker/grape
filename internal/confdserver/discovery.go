@@ -39,7 +39,7 @@ func (s *server) StreamResources(discovery *confd.Discovery, stream confd.ConfdS
 	s.log.Infof("discovery from %s(%s)", discovery.Service, discovery.Node.String())
 	configChan := make(chan *confd.Configs, 1)
 	defer close(configChan)
-	key := ServerKeyPrefix + discovery.Service
+	key := Key(discovery.Service)
 	// first send configs
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
@@ -48,14 +48,17 @@ func (s *server) StreamResources(discovery *confd.Discovery, stream confd.ConfdS
 		s.log.Errorf("unalble to get confis form etcd: %v", err)
 		return err
 	} else {
+		config := confd.Configs{}
 		if resp.Count == 1 {
-			config := confd.Configs{}
 			err := proto.Unmarshal(resp.Kvs[0].Value, &config)
 			if err != nil {
 				s.log.Errorf("Unmarshal configs err: %v", err)
 			} else {
 				configChan <- &config
 			}
+		} else {
+			// no service configs
+			configChan <- &config
 		}
 	}
 	s.w.notify(key, configChan)
@@ -68,4 +71,8 @@ func (s *server) StreamResources(discovery *confd.Discovery, stream confd.ConfdS
 		}
 	}
 	return nil
+}
+
+func Key(service string) string {
+	return ServerKeyPrefix + service
 }

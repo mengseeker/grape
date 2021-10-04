@@ -2,13 +2,13 @@ package confdserver
 
 import (
 	"context"
+	"encoding/json"
 	"grape/api/confd"
 	"grape/pkg/etcdcli"
 	"grape/pkg/logger"
 	"sync"
 
 	"go.etcd.io/etcd/api/v3/mvccpb"
-	"google.golang.org/protobuf/proto"
 )
 
 type watcher struct {
@@ -21,7 +21,7 @@ func (w *watcher) watchLoop(ctx context.Context, log logger.Logger) {
 	var handle = func(k, v []byte) {
 		if cs, ok := w.chans[string(k)]; ok {
 			config := confd.Configs{}
-			err := proto.Unmarshal(v, &config)
+			err := json.Unmarshal(v, &config)
 			if err != nil {
 				log.Errorf("Unmarshal configs err: %v", err)
 			} else {

@@ -35,6 +35,7 @@ func handleUpdateConfig(cf *confd.Configs) {
 		}
 	case confd.Configs_Kill:
 		killApplication(app)
+		<-app.done
 		app = newAppCmd(cf)
 	case confd.Configs_Command:
 		if cf.RestartCommand == "" {

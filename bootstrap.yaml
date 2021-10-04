@@ -11,4 +11,7 @@ etcd:
   address: localhost:2379
 
 discovery:
+  address: :15020
+
+api:
   address: :15010

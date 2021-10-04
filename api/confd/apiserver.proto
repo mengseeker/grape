@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+import "grape/api/core/common.proto";
+import "grape/api/confd/config.proto";
+
+package grape.api.confd;
+option go_package = "grape/api/confd";
+
+message GetRequest {
+  string service = 1;
+}
+
+message DelRequest {
+  string service = 1;
+}
+
+service ApiServer {
+  rpc Set(Configs) returns (core.Empty) {};
+  rpc Get(GetRequest) returns (Configs) {};
+  rpc Del(DelRequest) returns (core.Empty) {};
+}

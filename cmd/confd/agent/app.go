@@ -12,6 +12,10 @@ import (
 	"time"
 )
 
+const (
+	ApplicationKillTimeout = 30
+)
+
 var (
 	appLock sync.Mutex
 	app     *application
@@ -21,10 +25,14 @@ type application struct {
 	lock     sync.Locker
 	cmd      *exec.Cmd
 	signKill bool
+	done     chan struct{}
 }
 
 func handleApplication(ctx context.Context, ch <-chan *confd.Configs) {
 	cf := <-ch
+	if cf.Version == "" {
+		log.Warn("no configuration was found")
+	}
 	err := WriteConfigFiles(cf)
 	if err != nil {
 		log.Fatalf("fail to write config file: %v", err)
@@ -56,6 +64,7 @@ func waitApplication(a *application) {
 	pid := a.cmd.Process.Pid
 	log.Infof("application started at %d", pid)
 	err := a.cmd.Wait()
+	close(a.done)
 	a.lock.Lock()
 	defer a.lock.Unlock()
 	if a.signKill {
@@ -65,13 +74,27 @@ func waitApplication(a *application) {
 	if err != nil {
 		log.Fatalf("application %d exit unexpected: %v", pid, err)
 	} else {
-		log.Infof("application %d exit complete", pid)
+		log.Infof("application %d complete, exit", pid)
 		os.Exit(0)
 	}
 }
 
 func killApplication(a *application) {
+	a.lock.Lock()
+	defer a.lock.Unlock()
+	a.signKill = true
+	a.cmd.Process.Signal(os.Interrupt)
+	go killApplicationForce(a)
+}
 
+func killApplicationForce(a *application) {
+	select {
+	case <-a.done:
+		return
+	case <-time.After(ApplicationKillTimeout * time.Second):
+		log.Warnf("application %d unable to exit in %ds, force killed", a.cmd.Process.Pid, ApplicationKillTimeout)
+		a.cmd.Process.Kill()
+	}
 }
 
 func newAppCmd(cf *confd.Configs) *application {
@@ -91,6 +114,7 @@ func newAppCmd(cf *confd.Configs) *application {
 		lock:     &sync.Mutex{},
 		cmd:      c,
 		signKill: false,
+		done:     make(chan struct{}),
 	}
 	go waitApplication(a)
 	return a
