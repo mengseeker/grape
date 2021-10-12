@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+import "grape/api/v1/confd/types.proto";
+
+package grape.api.v1.confd;
+option go_package = "grape/api/v1/confd";
+
+message Discovery {
+  string service = 1;
+  string group = 2;
+}
+
+message DownloadRequest {
+  string service = 1;
+  string group = 2;
+  int64 loadVersion = 3;
+}
+
+message DownloadResponse {
+  int32 code = 1;
+  string message = 2;
+  Configs configs = 3;
+}
+
+service ConfdServer {
+  rpc StreamResources(Discovery) returns (stream Configs) {}
+  rpc Download(DownloadRequest) returns (DownloadResponse){}
+}

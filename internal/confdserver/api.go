@@ -2,10 +2,8 @@ package confdserver
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"grape/api/confd"
-	"grape/api/core"
+	"grape/api/v1/confd"
 	"grape/pkg/etcdcli"
 	"grape/pkg/logger"
 	"time"
@@ -21,17 +19,18 @@ func NewApiServer(log logger.Logger, cli *etcdcli.Client) *apiserver {
 	return &apiserver{cli: cli, log: log}
 }
 
-func (s *apiserver) Set(ctx context.Context, req *confd.Configs) (*core.Empty, error) {
-	s.log.Infof("set %s configs", req.Service)
-	key := Key(req.Service)
+func (s *apiserver) Set(ctx context.Context, req *confd.SetRequest) (*confd.SetResponse, error) {
+	service := req.ServerConfig.Service
+	s.log.Infof("set %s configs", service)
+	key := Key(service)
 	timeout, cancel := context.WithTimeout(ctx, time.Second*3)
 	defer cancel()
-	val, _ := json.Marshal(req)
+	val := MarshalServiceConfig(req.ServerConfig)
 	_, err := s.cli.Cli.KV.Put(timeout, key, string(val))
-	return &core.Empty{}, err
+	return &confd.SetResponse{}, err
 }
 
-func (s *apiserver) Get(ctx context.Context, req *confd.GetRequest) (*confd.Configs, error) {
+func (s *apiserver) Get(ctx context.Context, req *confd.GetRequest) (*confd.GetResponse, error) {
 	s.log.Infof("get %s configs", req.Service)
 	key := Key(req.Service)
 	timeout, cancel := context.WithTimeout(ctx, time.Second*3)
@@ -40,17 +39,18 @@ func (s *apiserver) Get(ctx context.Context, req *confd.GetRequest) (*confd.Conf
 	if err != nil {
 		return nil, err
 	}
-	cfs := confd.Configs{}
-	if resp.Count == 1 {
-		err := json.Unmarshal(resp.Kvs[0].Value, &cfs)
-		if err != nil {
-			return nil, fmt.Errorf("unable to unmarshal configs: %v", err)
-		}
+	if resp.Count == 0 {
+		return &confd.GetResponse{Code: ServiceConfigNotFoundCode, Message: "resource not found"}, nil
 	}
-	return &cfs, nil
+	sf, err := UnmarshalServiceConfig(resp.Kvs[0].Value)
+	if err != nil {
+		s.log.Errorf("unable to unmarshal serverConfigs: %v, value: %s", err, resp.Kvs[0].Value)
+		return nil, fmt.Errorf("unable to unmarshal serverConfigs: %v", err)
+	}
+	return &confd.GetResponse{ServerConfig: sf}, nil
 }
 
-func (s *apiserver) Del(ctx context.Context, req *confd.DelRequest) (*core.Empty, error) {
+func (s *apiserver) Del(ctx context.Context, req *confd.DelRequest) (*confd.DelResponse, error) {
 	s.log.Infof("del %s configs", req.Service)
 	key := Key(req.Service)
 	timeout, cancel := context.WithTimeout(ctx, time.Second*3)
@@ -59,5 +59,5 @@ func (s *apiserver) Del(ctx context.Context, req *confd.DelRequest) (*core.Empty
 	if err != nil {
 		return nil, err
 	}
-	return &core.Empty{}, nil
+	return &confd.DelResponse{}, nil
 }

@@ -2,53 +2,43 @@ package agent
 
 import (
 	"context"
-	"grape/api/confd"
+	"grape/api/v1/confd"
 	"os"
-	"os/exec"
-	"strings"
-	"time"
+)
+
+var (
+	lastConfigVersion = ""
 )
 
 func WriteConfigFiles(cf *confd.Configs) error {
+	if lastConfigVersion == cf.Version {
+		log.Infof("version %s loaded, skip update", cf.Version)
+		return nil
+	}
 	for _, file := range cf.FileConfigs {
 		err := os.WriteFile(file.Path, []byte(file.Content), 0644)
 		if err != nil {
 			return err
+		} else {
+			log.Infof("write fileConfig: %s", file.Path)
 		}
 	}
+	lastConfigVersion = cf.Version
 	return nil
 }
 
-func handleUpdateConfig(cf *confd.Configs) {
-	appLock.Lock()
-	defer appLock.Unlock()
-	log.Infof("update configs, type: %v", cf.RestartType)
-	switch cf.RestartType {
-	case confd.Configs_None:
-		log.Info("skip update")
-		return
-	case confd.Configs_WriteFiles:
-		err := WriteConfigFiles(cf)
-		if err != nil {
-			log.Errorf("write config files err: %v", err)
+func handleUpdateConfig(ctx context.Context, ch <-chan *confd.Configs) {
+	for {
+		select {
+		case <-ctx.Done():
 			return
-		}
-	case confd.Configs_Kill:
-		killApplication(app)
-		<-app.done
-		app = newAppCmd(cf)
-	case confd.Configs_Command:
-		if cf.RestartCommand == "" {
-			log.Errorf("empty RestartCommand")
-			return
-		}
-		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-		defer cancel()
-		args := strings.Split(cf.RestartCommand, " ")
-		err := exec.CommandContext(ctx, "sh", args...)
-		if err != nil {
-			log.Errorf("exec RestartCommand %s err: %v", cf.RestartCommand, err)
+		case cf := <-ch:
+			if cf.Version == "" {
+				log.Warn("no configuration was found")
+			}
+			if err := WriteConfigFiles(cf); err != nil {
+				log.Errorf("fail to write configs file: %v", err)
+			}
 		}
 	}
-	log.Info("configs updated")
 }

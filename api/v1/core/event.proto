@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+import "grape/api/v1/core/common.proto";
+
+package grape.api.v1.core;
+option go_package = "grape/api/v1/core";
+
+
+message Event {
+  string event_type = 1;
+
+  // Component node = 2;
+
+  bytes detail = 3;
+
+}
+
+service EventService {
+  rpc EventService(Event) returns (Empty) {}
+}

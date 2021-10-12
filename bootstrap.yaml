@@ -4,6 +4,19 @@ logging_level: debug
 redis:
   address: :6379
 
+graped:
+  address: :15010
+
+injector:
+  enable: true
+  address: :8082
+  cert: install/injector_cert.pem
+  cert_key: install/injector_key.pem
+  discovery_address: grape-discovery:15020
+  enable_confd: true
+  enable_mesh: true
+  enable_view: true
+
 auth:
   address: :11001
 
@@ -12,6 +25,3 @@ etcd:
 
 discovery:
   address: :15020
-
-api:
-  address: :15010

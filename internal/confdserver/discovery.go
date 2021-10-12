@@ -2,13 +2,16 @@ package confdserver
 
 import (
 	"context"
-	"grape/api/confd"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"grape/api/v1/confd"
 	"grape/pkg/etcdcli"
 	"grape/pkg/logger"
 	"sync"
 	"time"
 
-	"google.golang.org/protobuf/proto"
+	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 const (
@@ -26,7 +29,7 @@ func NewServer(log logger.Logger, cli *etcdcli.Client) *server {
 	watch := &watcher{
 		cli:   cli,
 		l:     sync.Mutex{},
-		chans: map[string]map[chan<- *confd.Configs]bool{},
+		chans: map[string]map[chan<- *confd.Configs]string{},
 	}
 	go watch.watchLoop(ctx, log)
 	return &server{
@@ -36,32 +39,15 @@ func NewServer(log logger.Logger, cli *etcdcli.Client) *server {
 }
 
 func (s *server) StreamResources(discovery *confd.Discovery, stream confd.ConfdServer_StreamResourcesServer) error {
-	s.log.Infof("discovery from %s(%s)", discovery.Service, discovery.Node.String())
+	s.log.Infof("discovery from %s:%s", discovery.Service, discovery.Group)
+	if discovery.Service == "" {
+		return errors.New("bad discovery service")
+	}
 	configChan := make(chan *confd.Configs, 1)
 	defer close(configChan)
+	s.FirstLoadConfig(discovery, configChan)
 	key := Key(discovery.Service)
-	// first send configs
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
-	defer cancel()
-	resp, err := s.w.cli.Cli.Get(ctx, key)
-	if err != nil {
-		s.log.Errorf("unalble to get confis form etcd: %v", err)
-		return err
-	} else {
-		config := confd.Configs{}
-		if resp.Count == 1 {
-			err := proto.Unmarshal(resp.Kvs[0].Value, &config)
-			if err != nil {
-				s.log.Errorf("Unmarshal configs err: %v", err)
-			} else {
-				configChan <- &config
-			}
-		} else {
-			// no service configs
-			configChan <- &config
-		}
-	}
-	s.w.notify(key, configChan)
+	s.w.notify(key, discovery.Group, configChan)
 	defer s.w.stop(key, configChan)
 	for config := range configChan {
 		err := stream.Send(config)
@@ -71,6 +57,64 @@ func (s *server) StreamResources(discovery *confd.Discovery, stream confd.ConfdS
 		}
 	}
 	return nil
+}
+
+func (s *server) FirstLoadConfig(discovery *confd.Discovery, configChan chan<- *confd.Configs) {
+	cf, err := s.GetServiceConfigs(discovery.Service, discovery.Group, 0)
+	if err != nil {
+		s.log.Errorf("unable to get service configs %v", err)
+		return
+	}
+	configChan <- cf
+}
+
+func (s *server) Download(ctx context.Context, req *confd.DownloadRequest) (*confd.DownloadResponse, error) {
+	cf, err := s.GetServiceConfigs(req.Service, req.Group, req.LoadVersion)
+	if err != nil {
+		return nil, err
+	}
+	return &confd.DownloadResponse{Code: OkCode, Configs: cf}, nil
+}
+
+func (s *server) GetServiceConfigs(service, group string, loadVersion int64) (*confd.Configs, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+	key := Key(service)
+	ops := []clientv3.OpOption{}
+	if loadVersion != 0 {
+		ops = append(ops, clientv3.WithRev(loadVersion))
+	}
+	resp, err := s.w.cli.Cli.Get(ctx, key, ops...)
+	if err != nil {
+		s.log.Errorf("unalble to get confis form etcd: %v", err)
+		return nil, err
+	}
+	if resp.Count == 0 {
+		return nil, fmt.Errorf("service configs %v not found", service)
+	}
+	sf, err := UnmarshalServiceConfig(resp.Kvs[0].Value)
+	if err != nil {
+		return nil, fmt.Errorf("unmarshal configs err: %v", err)
+	}
+	return GetGroupConfig(sf, group), nil
+}
+
+func UnmarshalServiceConfig(raw []byte) (*confd.ServerConfig, error) {
+	config := confd.ServerConfig{}
+	err := json.Unmarshal(raw, &config)
+	return &config, err
+}
+
+func MarshalServiceConfig(config *confd.ServerConfig) []byte {
+	j, _ := json.Marshal(config)
+	return j
+}
+
+func GetGroupConfig(config *confd.ServerConfig, group string) *confd.Configs {
+	if cf, ok := config.GroupConfigs[group]; ok {
+		return cf
+	}
+	return config.Default
 }
 
 func Key(service string) string {

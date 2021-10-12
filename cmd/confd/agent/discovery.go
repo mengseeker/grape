@@ -2,17 +2,13 @@ package agent
 
 import (
 	"context"
-	"grape/api/confd"
-	"grape/internal/iutils"
+	"grape/api/v1/confd"
 	"time"
 
 	"google.golang.org/grpc"
 )
 
 var (
-	// timeout for first loaddiing of configs
-	loadTimeout = 3 * time.Second
-
 	disconveryConn   *grpc.ClientConn
 	disconveryClient confd.ConfdServerClient
 
@@ -20,38 +16,22 @@ var (
 	// disconveryStream     confd.ConfdServer_StreamResourcesClient
 )
 
-func DiscoveryConfig(ctx context.Context) <-chan *confd.Configs {
-	ready := make(chan struct{})
-	timeout := time.After(loadTimeout)
-	cfChan := make(chan *confd.Configs)
-	go func() {
-		// dial and get config
-		var err error
-		dialTimeout, cancel := context.WithTimeout(ctx, time.Second*3)
-		defer cancel()
-		disconveryConn, err = grpc.DialContext(dialTimeout, config.discoveryAddress, grpc.WithInsecure())
-		if err != nil {
-			log.Fatalf("unable to connect to discovery server: %v", err)
-		}
-		go handleDiscovery(ctx, cfChan)
-		close(ready)
-	}()
-	select {
-	case <-timeout:
-		log.Fatal("timeout to load configs")
-	case <-ready:
-		log.Infof("discovery server %s connected", config.discoveryAddress)
-		break
+func DialDiscoveryServer(ctx context.Context) {
+	var err error
+	dialTimeout, cancel := context.WithTimeout(ctx, time.Second*3)
+	defer cancel()
+	disconveryConn, err = grpc.DialContext(dialTimeout, config.discoveryAddress, grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("unable to connect to discovery server: %v", err)
 	}
-	return cfChan
+	disconveryClient = confd.NewConfdServerClient(disconveryConn)
 }
 
 func handleDiscovery(ctx context.Context, cfs chan<- *confd.Configs) {
-	disconveryClient = confd.NewConfdServerClient(disconveryConn)
 	for {
 		err := discoveryStream(ctx, cfs)
 		if err != nil {
-			log.Errorf("discoveryStream exit: %v", err)
+			log.Errorf("discoveryStream fail: %v", err)
 		} else {
 			log.Errorf("discoveryStream exit unexpected")
 		}
@@ -65,7 +45,6 @@ func discoveryStream(ctx context.Context, cfs chan<- *confd.Configs) error {
 	defer cancel()
 	discovery := &confd.Discovery{
 		Service: config.service,
-		Node:    iutils.GetNode(),
 	}
 	disconveryStream, err := disconveryClient.StreamResources(streamCtx, discovery)
 	if err != nil {

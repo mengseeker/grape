@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+import "google/protobuf/any.proto";
+
+import "grape/api/v1/core/common.proto";
+
+package grape.api.v1.core;
+option go_package = "grape/api/v1/core";
+
+
+message DiscoveryRequest {
+  string version_info = 1;
+
+  // Component component = 2;
+
+  repeated string resource_names = 3;
+
+  // MCPResourceType resource_type = 4;
+
+  string response_nonce = 5;
+
+  string error_detail = 6;
+
+}
+
+message DiscoveryResponse {
+  string version_info = 1;
+
+  repeated google.protobuf.Any resource = 2;
+
+  // MCPResourceType resource_type = 4;
+
+  string nonce = 5;
+
+}
+
+
+
+service DiscoveryService {
+  rpc StreamResources(stream DiscoveryRequest) returns (stream DiscoveryResponse) {}
+}

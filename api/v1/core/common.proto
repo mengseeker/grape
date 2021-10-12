@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package grape.api.v1.core;
+option go_package = "grape/api/v1/core";
+
+message Empty {}
+
+message Node {
+  string ip = 1;
+  string host = 2;
+  string service = 3; // ns + serviceCode
+  string group = 4;
+}

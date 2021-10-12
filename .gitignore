@@ -1,4 +1,4 @@
 vendor
 boil_sql.log
 static
-build
+.build

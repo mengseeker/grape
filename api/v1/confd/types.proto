@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+import "grape/api/v1/core/common.proto";
+
+package grape.api.v1.confd;
+option go_package = "grape/api/v1/confd";
+
+message FileConfig {
+  string path = 1;
+  string content = 2;
+}
+
+message EnvConfig {
+  string key = 1;
+  string value = 2;
+}
+
+message Configs {
+  string version = 1;
+  // string run = 2;
+  repeated FileConfig fileConfigs = 3;
+  repeated EnvConfig envConfigs = 4;
+  string service = 5;
+  string group = 6;
+}
+
+message ServerConfig {
+  string version = 1;
+  string service = 2;
+  Configs default = 3;
+  map<string, Configs> groupConfigs = 4;
+}

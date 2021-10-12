@@ -1,9 +1,11 @@
 package server
 
 import (
-	"grape/api/confd"
+	"grape/api/v1/confd"
+	"grape/api/v1/view"
 	"grape/internal/confdserver"
 	"grape/internal/share"
+	"grape/internal/viewserver"
 	"grape/pkg/etcdcli"
 	"grape/pkg/logger"
 	"net"
@@ -41,12 +43,15 @@ func serve() {
 	if err != nil {
 		log.Fatalf("unalble to connect to etcd: %v", err)
 	}
+
 	grpcServer := grpc.NewServer()
 
 	// V3server()
 	// dnsServer()
-	// logagent server
-	// confdagent server
+
+	ls := viewserver.NewServer(log, ec)
+	view.RegisterDiscoveryServerServer(grpcServer, ls)
+
 	cs := confdserver.NewServer(log, ec)
 	confd.RegisterConfdServerServer(grpcServer, cs)
 

@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+import "grape/api/v1/core/common.proto";
+
+package grape.api.v1.view;
+option go_package = "grape/api/v1/view";
+
+message FileLog {
+  string name = 1;
+  string path = 2;
+  string jsPaser = 3;
+  string eventer = 4;
+}
+
+message ServiceLogs {
+  string version = 1;
+  string service = 2;
+  repeated FileLog logs = 3;
+}
+
+message AllLogs {
+  string version = 1;
+  repeated ServiceLogs logs = 2;
+}
+
+message GetRequest {
+  string service = 2;
+}
+
+message DelRequest {
+  string service = 2;
+}
+
+message DiscoveryRequest {
+
+}
+
+service ApiServer {
+  rpc Set(ServiceLogs) returns (grape.api.v1.core.Empty) {};
+  rpc Get(GetRequest) returns (ServiceLogs) {};
+  rpc Del(DelRequest) returns (grape.api.v1.core.Empty) {};
+}
+
+service DiscoveryServer {
+  rpc StreamLogs(DiscoveryRequest) returns (stream AllLogs) {}
+}
