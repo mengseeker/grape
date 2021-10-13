@@ -47,18 +47,21 @@ func injectPod(cf *InjectorConfig, ar *kubeApiAdmissionv1.AdmissionReview) error
 
 	ann := pod.Annotations
 	if cf.EnableConfd && ann[ConfdEnableKey] != "disable" {
+		cf.Log.Debugf("inject confd for %s/%s", pod.Namespace, podName)
 		if err := doInjectConfd(cf, &pod, mergedPod); err != nil {
 			return err
 		}
 	}
 
 	if cf.EnableMesh && ann[MeshEnableKey] != "disable" {
+		cf.Log.Debugf("inject mesh for %s/%s", pod.Namespace, podName)
 		if err := doInjectMesh(cf, &pod, mergedPod); err != nil {
 			return err
 		}
 	}
 
 	if cf.EnableView && ann[ViewEnableKey] != "disable" {
+		cf.Log.Debugf("inject view for %s/%s", pod.Namespace, podName)
 		if err := doInjectView(cf, &pod, mergedPod); err != nil {
 			return err
 		}
@@ -100,11 +103,13 @@ func doInjectConfd(ijf *InjectorConfig, pod, merge *corev1.Pod) error {
 		return fmt.Errorf("annotation %s not found", ServiceCodeKey)
 	}
 	groupCode := pod.Annotations[GroupCodeKey]
+	service := pod.Namespace + "/" + serviceCode
+	ijf.Log.Debugf("inject serverConfigs %s(%s)", service, groupCode)
 	appContainer, err := getAppContatiner(merge)
 	if err != nil {
 		return err
 	}
-	serverConfigs, rev, err := confdserver.GetServiceConfigs(ijf.Cli, serviceCode, groupCode, 0)
+	serverConfigs, rev, err := confdserver.GetServiceConfigs(ijf.Cli, service, groupCode, 0)
 	if err != nil {
 		return err
 	}
@@ -112,7 +117,6 @@ func doInjectConfd(ijf *InjectorConfig, pod, merge *corev1.Pod) error {
 		return nil
 	}
 	injectEnv(appContainer, serverConfigs.EnvConfigs)
-
 	injectFiles(ijf, serverConfigs.FileConfigs, appContainer, merge, serviceCode, groupCode, rev)
 	return nil
 }
@@ -127,7 +131,7 @@ func injectFiles(ijf *InjectorConfig, cf []*confd.FileConfig, ac *corev1.Contain
 	c.Args = append(c.Args, "-a", ijf.DiscoveryAddress)
 	c.Args = append(c.Args, "-l", strconv.Itoa(int(rev)))
 	for _, f := range cf {
-		hf := fmt.Sprintf("%s%s/%d", ijf.ConfdHostPathBaseDir, time.Now().Format("2006-01-02"), time.Now().UnixNano())
+		hf := fmt.Sprintf("%s%s/%d", ConfdHostPathBaseDir, time.Now().Format("2006-01-02"), time.Now().UnixNano())
 		var hp corev1.HostPathType = "FileOrCreate"
 		pod.Spec.Volumes = append(pod.Spec.Volumes, corev1.Volume{
 			Name: f.Name, VolumeSource: corev1.VolumeSource{

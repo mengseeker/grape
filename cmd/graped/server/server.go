@@ -92,6 +92,8 @@ func runInjectorServer(cli *etcdcli.Client) {
 		EnableConfd:      viper.GetBool("injector.enable_confd"),
 		EnableMesh:       viper.GetBool("injector.enable_mesh"),
 		EnableView:       viper.GetBool("injector.enable_view"),
+		SidecarImage:     viper.GetString("injector.sidecar_image"),
+		ConfdAgentImage:  viper.GetString("injector.confd_agent_image"),
 	}
 	log.Infof("listenning injector server at %s", address)
 	mux := http.NewServeMux()

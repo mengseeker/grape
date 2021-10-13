@@ -16,6 +16,10 @@ var (
 	errUnsupportKind = errors.New("unsupport kind")
 )
 
+const (
+	ConfdHostPathBaseDir = "/opt/grape/confd/"
+)
+
 type InjectorConfig struct {
 	Cli              *etcdcli.Client
 	Log              logger.Logger
@@ -26,9 +30,6 @@ type InjectorConfig struct {
 
 	ConfdAgentImage string
 	SidecarImage    string
-
-	// end with "/"
-	ConfdHostPathBaseDir string
 }
 
 func (cf *InjectorConfig) NewjectHandler() http.HandlerFunc {
@@ -61,6 +62,7 @@ func (cf *InjectorConfig) NewjectHandler() http.HandlerFunc {
 
 	WRITE_RESP:
 		w.Header().Set("Content-Type", "application/json")
+		review.Request = nil
 		if err := json.NewEncoder(w).Encode(review); err != nil {
 			cf.Log.Errorf("Marshal of response failed with error: %v", err)
 			http.Error(w, err.Error(), 500)

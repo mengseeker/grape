@@ -23,7 +23,7 @@
       "version": "v1",
       "resource": "pods"
     },
-    "namespace": "default",
+    "namespace": "dev",
     "operation": "CREATE",
     "userInfo": {
       "username": "system:serviceaccount:kube-system:replicaset-controller",
@@ -45,8 +45,8 @@
           "pod-template-hash": "f6fd79558"
         },
         "annotations": {
-          "service-code": "redis",
-          "group-code": "redis-redis",
+          "grape/service-code": "demo",
+          "grape/group-code": "v1",
           "service-port": "6379"
         },
         "ownerReferences": [

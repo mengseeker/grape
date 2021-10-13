@@ -16,6 +16,8 @@ injector:
   enable_confd: true
   enable_mesh: true
   enable_view: true
+  confd_agent_image: repo.nexttao.com.cn/common/confd-agent:v1
+  sidecar_image: repo.nexttao.com.cn/common/grape-sidecar:v1
 
 auth:
   address: :11001
