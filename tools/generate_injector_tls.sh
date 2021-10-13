@@ -1,4 +1,4 @@
-cert_host=graped.grapesystem.svc
+cert_host=graped.grape-system.svc
 
 GOROOT=${GOROOT:-/usr/local/go}
 go run ${GOROOT}/src/crypto/tls/generate_cert.go \

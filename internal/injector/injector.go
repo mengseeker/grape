@@ -23,6 +23,12 @@ type InjectorConfig struct {
 	EnableMesh       bool
 	EnableView       bool
 	DiscoveryAddress string
+
+	ConfdAgentImage string
+	SidecarImage    string
+
+	// end with "/"
+	ConfdHostPathBaseDir string
 }
 
 func (cf *InjectorConfig) NewjectHandler() http.HandlerFunc {

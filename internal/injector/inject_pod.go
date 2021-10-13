@@ -3,7 +3,10 @@ package injector
 import (
 	"encoding/json"
 	"fmt"
-	"grape/internal/share"
+	"grape/api/v1/confd"
+	"grape/internal/confdserver"
+	"strconv"
+	"time"
 
 	"gomodules.xyz/jsonpatch/v3"
 	kubeApiAdmissionv1 "k8s.io/api/admission/v1"
@@ -18,6 +21,10 @@ const (
 	ServiceCodeKey = "grape/service-code"
 	ServicePortKey = "grape/service-port"
 	GroupCodeKey   = "grape/group-code"
+)
+
+const (
+	ConfdAgentContainerName = "confd-agent"
 )
 
 func injectPod(cf *InjectorConfig, ar *kubeApiAdmissionv1.AdmissionReview) error {
@@ -87,20 +94,58 @@ func patchPodResponse(ar *kubeApiAdmissionv1.AdmissionReview, pod, merge *corev1
 	return nil
 }
 
-func doInjectConfd(cf *InjectorConfig, pod, merge *corev1.Pod) error {
+func doInjectConfd(ijf *InjectorConfig, pod, merge *corev1.Pod) error {
 	serviceCode := pod.Annotations[ServiceCodeKey]
 	if serviceCode == "" {
 		return fmt.Errorf("annotation %s not found", ServiceCodeKey)
 	}
+	groupCode := pod.Annotations[GroupCodeKey]
 	appContainer, err := getAppContatiner(merge)
 	if err != nil {
 		return err
 	}
-	appendContainerEnv(appContainer, share.EnvServiceCode, serviceCode)
-	appendContainerEnv(appContainer, share.EnvNamespace, pod.Namespace)
-	appendContainerEnv(appContainer, share.EnvGroupCode, pod.Annotations[GroupCodeKey])
-	// appendContainerEnv(appContainer, share.EnvDiscoveryAddress, cf.DiscoveryAddress)
+	serverConfigs, rev, err := confdserver.GetServiceConfigs(ijf.Cli, serviceCode, groupCode, 0)
+	if err != nil {
+		return err
+	}
+	if serverConfigs == nil {
+		return nil
+	}
+	injectEnv(appContainer, serverConfigs.EnvConfigs)
+
+	injectFiles(ijf, serverConfigs.FileConfigs, appContainer, merge, serviceCode, groupCode, rev)
 	return nil
+}
+
+func injectFiles(ijf *InjectorConfig, cf []*confd.FileConfig, ac *corev1.Container, pod *corev1.Pod, serviceCode, groupCode string, rev int64) {
+	c := corev1.Container{}
+	c.Name = ConfdAgentContainerName
+	c.Image = ijf.ConfdAgentImage
+	c.ImagePullPolicy = corev1.PullIfNotPresent
+	c.Args = append(c.Args, "-s", fmt.Sprintf("%s/%s", pod.Namespace, serviceCode))
+	c.Args = append(c.Args, "-g", groupCode)
+	c.Args = append(c.Args, "-a", ijf.DiscoveryAddress)
+	c.Args = append(c.Args, "-l", strconv.Itoa(int(rev)))
+	for _, f := range cf {
+		hf := fmt.Sprintf("%s%s/%d", ijf.ConfdHostPathBaseDir, time.Now().Format("2006-01-02"), time.Now().UnixNano())
+		var hp corev1.HostPathType = "FileOrCreate"
+		pod.Spec.Volumes = append(pod.Spec.Volumes, corev1.Volume{
+			Name: f.Name, VolumeSource: corev1.VolumeSource{
+				HostPath: &corev1.HostPathVolumeSource{
+					Path: hf, Type: &hp,
+				},
+			},
+		})
+		c.VolumeMounts = append(c.VolumeMounts, corev1.VolumeMount{Name: f.Name, MountPath: f.Path, ReadOnly: false})
+		ac.VolumeMounts = append(ac.VolumeMounts, corev1.VolumeMount{Name: f.Name, MountPath: f.Path, ReadOnly: true})
+	}
+	pod.Spec.InitContainers = append(pod.Spec.InitContainers, c)
+}
+
+func injectEnv(c *corev1.Container, env []*confd.EnvConfig) {
+	for _, e := range env {
+		appendContainerEnv(c, e.Key, e.Value)
+	}
 }
 
 func doInjectMesh(cf *InjectorConfig, pod, merge *corev1.Pod) error {

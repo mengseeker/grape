@@ -47,7 +47,15 @@ func potentialPodName(metadata metav1.ObjectMeta) string {
 }
 
 func errAdmissionResponse(ar *kubeApiAdmissionv1.AdmissionReview, errMessage string) {
-
+	ar.Response = &kubeApiAdmissionv1.AdmissionResponse{
+		Allowed: false,
+		Result: &metav1.Status{
+			Message: errMessage,
+		},
+	}
+	if ar.Request != nil {
+		ar.Response.UID = ar.Request.UID
+	}
 }
 
 func getAppContatiner(pod *corev1.Pod) (*corev1.Container, error) {

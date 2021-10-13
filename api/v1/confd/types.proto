@@ -6,8 +6,9 @@ package grape.api.v1.confd;
 option go_package = "grape/api/v1/confd";
 
 message FileConfig {
-  string path = 1;
-  string content = 2;
+  string name = 1;
+  string path = 2;
+  string content = 3;
 }
 
 message EnvConfig {
