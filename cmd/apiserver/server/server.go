@@ -64,7 +64,7 @@ func serve() {
 	// mesh apiserver
 	// k8s apiserver
 
-	apiAddress := viper.GetString("graped.address")
+	apiAddress := viper.GetString("apiserver.address")
 	lis, err := net.Listen("tcp", apiAddress)
 	if err != nil {
 		log.Fatal("unable to listen %s: %v", apiAddress, err)
@@ -104,7 +104,7 @@ func runInjectorServer(cli *etcdcli.Client) {
 }
 
 func initConfig() {
-	viper.SetDefault("graped.address", "0.0.0.0:15010")
+	viper.SetDefault("apiserver.address", "0.0.0.0:15010")
 
 	viper.SetDefault("injector.enable", true)
 	viper.SetDefault("injector.address", "0.0.0.0:8082")

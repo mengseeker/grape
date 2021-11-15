@@ -103,13 +103,12 @@ func doInjectConfd(ijf *InjectorConfig, pod, merge *corev1.Pod) error {
 		return fmt.Errorf("annotation %s not found", ServiceCodeKey)
 	}
 	groupCode := pod.Annotations[GroupCodeKey]
-	service := pod.Namespace + "/" + serviceCode
-	ijf.Log.Debugf("inject serverConfigs %s(%s)", service, groupCode)
+	ijf.Log.Debugf("inject serverConfigs %s/%s(%s)", pod.Namespace, serviceCode, groupCode)
 	appContainer, err := getAppContatiner(merge)
 	if err != nil {
 		return err
 	}
-	serverConfigs, rev, err := confdserver.GetServiceConfigs(ijf.Cli, service, groupCode, 0)
+	serverConfigs, rev, err := confdserver.GetServiceConfigs(ijf.Cli, pod.Namespace, serviceCode, groupCode, 0)
 	if err != nil {
 		return err
 	}

@@ -14,18 +14,25 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	service := "dev/demo"
 	version := iutils.NewVersion()
 	cli := confd.NewApiServerClient(conn)
 	cf := confd.Configs{
-		Version:     version,
-		Service:     service,
-		FileConfigs: []*confd.FileConfig{{Path: "/tmp/grape_demo.yaml", Content: "aa: 1"}},
+		Version: version,
+		FileConfigs: []*confd.FileConfig{
+			{Path: "/tmp/grape_demo.yaml", Content: "aa: 1"},
+			{Path: "logs/not_exist.yaml", Content: "aa: 1"},
+		},
+		// RestartType: confd.Configs_Kill,
+		// RestartType:    confd.Configs_WriteFiles,
+		RestartType:    confd.Configs_Command,
+		RunCmd:         "top",
+		RestartCommand: "apk add htop",
 	}
 	_, err = cli.Set(context.Background(), &confd.SetRequest{
 		ServerConfig: &confd.ServerConfig{
-			Service: service,
-			Default: &cf,
+			Namespace: "demo",
+			Service:   "order",
+			Default:   &cf,
 		}})
 	if err != nil {
 		log.Fatal(err)

@@ -27,7 +27,7 @@ message Configs {
   string runCmd = 2;
   repeated FileConfig fileConfigs = 3;
   repeated EnvConfig envConfigs = 4;
-  string service = 5;
+  // string service = 5;
   string group = 6;
   RestartType restartType = 7;
   string restartCommand = 8;
@@ -35,7 +35,8 @@ message Configs {
 
 message ServerConfig {
   string version = 1;
-  string service = 2;
-  Configs default = 3;
-  map<string, Configs> groupConfigs = 4;
+  string namespace = 2;
+  string service = 3;
+  Configs default = 4;
+  map<string, Configs> groupConfigs = 5;
 }

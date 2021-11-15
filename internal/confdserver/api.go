@@ -20,9 +20,8 @@ func NewApiServer(log logger.Logger, cli *etcdcli.Client) *apiserver {
 }
 
 func (s *apiserver) Set(ctx context.Context, req *confd.SetRequest) (*confd.SetResponse, error) {
-	service := req.ServerConfig.Service
-	s.log.Infof("set %s configs", service)
-	key := Key(service)
+	s.log.Infof("set %s/%s", req.ServerConfig.Namespace, req.ServerConfig.Service)
+	key := Key(req.ServerConfig.Namespace, req.ServerConfig.Service)
 	timeout, cancel := context.WithTimeout(ctx, time.Second*3)
 	defer cancel()
 	val := MarshalServiceConfig(req.ServerConfig)
@@ -31,8 +30,8 @@ func (s *apiserver) Set(ctx context.Context, req *confd.SetRequest) (*confd.SetR
 }
 
 func (s *apiserver) Get(ctx context.Context, req *confd.GetRequest) (*confd.GetResponse, error) {
-	s.log.Infof("get %s configs", req.Service)
-	key := Key(req.Service)
+	s.log.Infof("get %s/%s", req.Namespace, req.Service)
+	key := Key(req.Namespace, req.Service)
 	timeout, cancel := context.WithTimeout(ctx, time.Second*3)
 	defer cancel()
 	resp, err := s.cli.Cli.Get(timeout, key)
@@ -52,7 +51,7 @@ func (s *apiserver) Get(ctx context.Context, req *confd.GetRequest) (*confd.GetR
 
 func (s *apiserver) Del(ctx context.Context, req *confd.DelRequest) (*confd.DelResponse, error) {
 	s.log.Infof("del %s configs", req.Service)
-	key := Key(req.Service)
+	key := Key(req.Namespace, req.Service)
 	timeout, cancel := context.WithTimeout(ctx, time.Second*3)
 	defer cancel()
 	_, err := s.cli.Cli.Delete(timeout, key)

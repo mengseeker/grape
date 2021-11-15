@@ -24,7 +24,6 @@ func runDiscovery(discoveryChan chan<- *confdv1.Configs) {
 	handleDiscovery(context.Background(), discoveryChan)
 }
 
-
 func dialDiscoveryServer(ctx context.Context) error {
 	var err error
 	dialTimeout, cancel := context.WithTimeout(ctx, time.Second*3)
@@ -54,7 +53,9 @@ func discoveryStream(ctx context.Context, cfs chan<- *confdv1.Configs) error {
 	streamCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	discovery := &confdv1.Discovery{
-		Service: config.service,
+		Namespace: config.namespace,
+		Service:   config.service,
+		Group:     config.group,
 	}
 	disconveryStream, err := disconveryClient.StreamResources(streamCtx, discovery)
 	if err != nil {

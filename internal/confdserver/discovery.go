@@ -35,13 +35,13 @@ func NewServer(log logger.Logger, cli *etcdcli.Client) *server {
 
 func (s *server) StreamResources(discovery *confd.Discovery, stream confd.ConfdServer_StreamResourcesServer) error {
 	s.log.Infof("discovery from %s:%s", discovery.Service, discovery.Group)
-	if discovery.Service == "" {
+	if discovery.Namespace == "" || discovery.Service == "" {
 		return errors.New("bad discovery service")
 	}
 	configChan := make(chan *confd.Configs, 1)
 	defer close(configChan)
 	s.FirstLoadConfig(discovery, configChan)
-	key := Key(discovery.Service)
+	key := Key(discovery.Namespace, discovery.Service)
 	s.w.notify(key, discovery.Group, configChan)
 	defer s.w.stop(key, configChan)
 	for config := range configChan {
@@ -57,7 +57,7 @@ func (s *server) StreamResources(discovery *confd.Discovery, stream confd.ConfdS
 }
 
 func (s *server) FirstLoadConfig(discovery *confd.Discovery, configChan chan<- *confd.Configs) {
-	cf, err := GetLatestServiceConfigs(s.w.cli, discovery.Service, discovery.Group)
+	cf, err := GetLatestServiceConfigs(s.w.cli, discovery.Namespace, discovery.Service, discovery.Group)
 	if err != nil {
 		s.log.Errorf("unable to get service configs %v", err)
 		return
@@ -66,7 +66,7 @@ func (s *server) FirstLoadConfig(discovery *confd.Discovery, configChan chan<- *
 }
 
 func (s *server) Download(ctx context.Context, req *confd.DownloadRequest) (*confd.DownloadResponse, error) {
-	cf, err := GetRevServiceConfigs(s.w.cli, req.Service, req.Group, req.LoadVersion)
+	cf, err := GetRevServiceConfigs(s.w.cli, req.Namespace, req.Service, req.Group, req.LoadVersion)
 	if err != nil {
 		return nil, err
 	}

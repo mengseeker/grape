@@ -4,6 +4,7 @@ import (
 	"context"
 	"grape/api/v1/confd"
 	"os"
+	"strings"
 )
 
 var (
@@ -11,13 +12,21 @@ var (
 )
 
 func WriteConfigFiles(cf *confd.Configs) error {
+	if cf.Version == "" {
+		return nil
+	}
 	if lastConfigVersion == cf.Version {
 		log.Infof("version %s loaded, skip update", cf.Version)
 		return nil
 	}
 	for _, file := range cf.FileConfigs {
-		err := os.WriteFile(file.Path, []byte(file.Content), 0644)
-		if err != nil {
+		dir := file.Path[0:strings.LastIndex(file.Path, "/")]
+		if dir != "" {
+			if err := os.MkdirAll(dir, 0755); err != nil {
+				return err
+			}
+		}
+		if err := os.WriteFile(file.Path, []byte(file.Content), 0644); err != nil {
 			return err
 		} else {
 			log.Infof("write fileConfig: %s", file.Path)
@@ -45,15 +54,6 @@ func handleUpdateConfigs(ctx context.Context, ch <-chan *confd.Configs, app *App
 }
 
 func updateConfig(cf *confd.Configs, app *Application) error {
-	if !app.Started() {
-		// first start application
-		app.UpdateEnv(cf.EnvConfigs)
-		if err := WriteConfigFiles(cf); err != nil {
-			return err
-		}
-		return app.Start(cf.RunCmd)
-	}
-
 	log.Infof("update configs, type: %v", cf.RestartType)
 	if cf.RestartType == confd.Configs_None {
 		log.Info("skip update")

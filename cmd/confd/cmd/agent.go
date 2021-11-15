@@ -60,15 +60,18 @@ func NewCmd() *cobra.Command {
 func startAgent() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
-	cfs := lcadConfigs(ctx)
+	cfs := loadConfigs(ctx)
 	app := NewApplication(config.runCmd)
+	app.UpdateEnv(cfs.EnvConfigs)
 	if config.discovery {
+		// try to start application
+		if err := app.TryStart(cfs.RunCmd); err != nil {
+			log.Fatalf("start application err: %v", err)
+		}
 		discoveryChan := make(chan *confdv1.Configs, 1)
-		discoveryChan <- cfs
 		go runDiscovery(discoveryChan)
 		handleUpdateConfigs(context.Background(), discoveryChan, app)
 	} else {
-		app.UpdateEnv(cfs.EnvConfigs)
 		if err := app.RunExecApplication(cfs.RunCmd); err != nil {
 			log.Fatal(err)
 		}
@@ -87,11 +90,12 @@ func checkfigure() {
 	}
 }
 
-func lcadConfigs(ctx context.Context) *confdv1.Configs {
+func loadConfigs(ctx context.Context) *confdv1.Configs {
 	dialDiscoveryServer(ctx)
 	req := confdv1.DownloadRequest{
-		Service: config.service,
-		Group:   config.group,
+		Namespace: config.namespace,
+		Service:   config.service,
+		Group:     config.group,
 		// LoadVersion: config.loadVersion,
 	}
 	resp, err := disconveryClient.Download(ctx, &req)
@@ -101,9 +105,11 @@ func lcadConfigs(ctx context.Context) *confdv1.Configs {
 	if resp.Code != confdserver.OkCode {
 		log.Fatalf("failed to download configs: %v", resp.Message)
 	}
+	// if resp.Configs != nil {
 	err = WriteConfigFiles(resp.Configs)
 	if err != nil {
 		log.Fatalf("failed to download configs: %v", err)
 	}
+	// }
 	return resp.Configs
 }

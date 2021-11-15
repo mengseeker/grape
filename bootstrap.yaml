@@ -4,11 +4,11 @@ logging_level: debug
 redis:
   address: :6379
 
-graped:
+apiserver:
   address: :15010
 
 injector:
-  enable: true
+  enable: false
   address: :8082
   cert: install/injector_cert.pem
   cert_key: install/injector_key.pem
@@ -23,7 +23,7 @@ auth:
   address: :11001
 
 etcd:
-  address: localhost:2379
+  address: etcd:2379
 
 discovery:
   address: :15020

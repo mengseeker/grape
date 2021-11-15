@@ -1,0 +1,38 @@
+services:
+  etcd:
+    image: bitnami/etcd
+    environment:
+    - ALLOW_NONE_AUTHENTICATION=yes
+    ports:
+    - 2379:2379
+
+  apiserver:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.apiserver
+    volumes:
+    - ./bootstrap.yaml:/goworker/bootstrap.yaml
+    ports:
+    - 15010:15010
+    command: apiserver s
+    links:
+    - etcd
+
+  discovery:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.discovery
+    volumes:
+    - ./bootstrap.yaml:/goworker/bootstrap.yaml
+    links:
+    - etcd
+    ports:
+    - 15020:15020
+    
+  confd:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.testapp
+    command: confd -a discovery:15020 -n demo -s order -g order-demo-v1 -d
+    depends_on:
+    - discovery

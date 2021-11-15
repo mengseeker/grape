@@ -6,14 +6,16 @@ package grape.api.v1.confd;
 option go_package = "grape/api/v1/confd";
 
 message Discovery {
-  string service = 1;
-  string group = 2;
+  string namespace = 1;
+  string service = 2;
+  string group = 3;
 }
 
 message DownloadRequest {
-  string service = 1;
-  string group = 2;
-  int64 loadVersion = 3;
+  string namespace = 1;
+  string service = 2;
+  string group = 3;
+  int64 loadVersion = 4;
 }
 
 message DownloadResponse {

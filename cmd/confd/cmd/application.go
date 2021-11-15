@@ -43,13 +43,11 @@ func (app *Application) UpdateEnv(env []*confdv1.EnvConfig) {
 }
 
 func (app *Application) Started() bool {
-	return app.cmd == nil
+	return app.cmd != nil
 }
 
 func (app *Application) CreateCmd(runCmd string) {
-	if app.runCmd == "" {
-		runCmd = app.runCmd
-	}
+	log.Infof("exec %q", runCmd)
 	args := strings.Split(runCmd, " ")
 	app.cmd = exec.Command(args[0], args[1:]...)
 	app.cmd.Stdout = os.Stdout
@@ -61,7 +59,15 @@ func (app *Application) CreateCmd(runCmd string) {
 	app.done = make(chan struct{})
 }
 
-func (app *Application) Start(runCmd string) error {
+func (app *Application) TryStart(runCmd string) error {
+	if app.runCmd != "" {
+		runCmd = app.runCmd
+	}
+
+	if runCmd == "" {
+		// if have no command to run, just return
+		return nil
+	}
 	app.lock.Lock()
 	defer app.lock.Unlock()
 
@@ -69,7 +75,7 @@ func (app *Application) Start(runCmd string) error {
 
 	err := app.cmd.Start()
 	if err != nil {
-		log.Fatalf("failed to start application: %v", err)
+		log.Fatalf("failed to start application %q: %v", runCmd, err)
 	}
 	go app.handleSign()
 	go app.waitApplication()
@@ -77,6 +83,16 @@ func (app *Application) Start(runCmd string) error {
 }
 
 func (app *Application) RestartByKill(runCmd string) error {
+	if app.runCmd != "" {
+		runCmd = app.runCmd
+	}
+
+	// if not started, just start
+	if !app.Started() {
+		app.TryStart(runCmd)
+		return nil
+	}
+
 	app.killApplication()
 
 	// wait application process exited and function waitApplication returned
@@ -84,6 +100,12 @@ func (app *Application) RestartByKill(runCmd string) error {
 
 	app.lock.Lock()
 	defer app.lock.Unlock()
+	app.cmd = nil
+
+	if runCmd == "" && app.runCmd == "" {
+		// if have no command to run, just return
+		return nil
+	}
 
 	app.CreateCmd(runCmd)
 
@@ -106,25 +128,25 @@ func (app *Application) RestartByCommand(runCmd string, restartCommand string) e
 }
 
 func (app *Application) RunExecApplication(runCmd string) error {
-	return app.Start(runCmd)
+	return app.TryStart(runCmd)
 }
 
 func (app *Application) waitApplication() {
 	defer close(app.done)
 	pid := app.cmd.Process.Pid
-	log.Infof("application started at %d", pid)
+	log.Infof("application started at pid: %d", pid)
 	err := app.cmd.Wait()
 	app.lock.Lock()
 	defer app.lock.Unlock()
 	if app.signKill {
-		log.Warnf("application %d sign killed by confd", pid)
+		log.Warnf("application(%d) sign killed by confd", pid)
 		return
 	}
 	if err != nil {
-		log.Fatalf("application %d exit unexpected: %v", pid, err)
+		log.Fatalf("application(%d) exit unexpected: %v", pid, err)
 		os.Exit(1)
 	} else {
-		log.Infof("application %d complete, exit", pid)
+		log.Infof("application(%d) complete, exit", pid)
 		os.Exit(0)
 	}
 }

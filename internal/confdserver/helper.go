@@ -29,14 +29,14 @@ func GetGroupConfig(config *confd.ServerConfig, group string) *confd.Configs {
 	return config.Default
 }
 
-func Key(service string) string {
-	return ServerKeyPrefix + service
+func Key(namespace, service string) string {
+	return ServerKeyPrefix + namespace + "/" + service
 }
 
-func GetServiceConfigs(cli *etcdcli.Client, service, group string, loadVersion int64) (*confd.Configs, int64, error) {
+func GetServiceConfigs(cli *etcdcli.Client, namespace, service, group string, loadVersion int64) (*confd.Configs, int64, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
-	key := Key(service)
+	key := Key(namespace, service)
 	ops := []clientv3.OpOption{}
 	if loadVersion != 0 {
 		ops = append(ops, clientv3.WithRev(loadVersion))
@@ -45,8 +45,9 @@ func GetServiceConfigs(cli *etcdcli.Client, service, group string, loadVersion i
 	if err != nil {
 		return nil, 0, fmt.Errorf("unalble to get confis form etcd: %v", err)
 	}
+	// if config not found, return an emptys
 	if resp.Count == 0 {
-		return nil, 0, nil
+		return &confd.Configs{}, 0, nil
 	}
 	sf, err := UnmarshalServiceConfig(resp.Kvs[0].Value)
 	if err != nil {
@@ -55,12 +56,12 @@ func GetServiceConfigs(cli *etcdcli.Client, service, group string, loadVersion i
 	return GetGroupConfig(sf, group), resp.Header.Revision, nil
 }
 
-func GetRevServiceConfigs(cli *etcdcli.Client, service, group string, loadVersion int64) (*confd.Configs, error) {
-	cf, _, err := GetServiceConfigs(cli, service, group, loadVersion)
+func GetRevServiceConfigs(cli *etcdcli.Client, namespace, service, group string, loadVersion int64) (*confd.Configs, error) {
+	cf, _, err := GetServiceConfigs(cli, namespace, service, group, loadVersion)
 	return cf, err
 }
 
-func GetLatestServiceConfigs(cli *etcdcli.Client, service, group string) (*confd.Configs, error) {
-	cf, _, err := GetServiceConfigs(cli, service, group, 0)
+func GetLatestServiceConfigs(cli *etcdcli.Client, namespace, service, group string) (*confd.Configs, error) {
+	cf, _, err := GetServiceConfigs(cli, namespace, service, group, 0)
 	return cf, err
 }
