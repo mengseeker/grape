@@ -35,12 +35,12 @@ func NewCmd() *cobra.Command {
 			startAgent()
 		},
 	}
-	cmd.PersistentFlags().StringVar(&config.discoveryAddress, "discoveryAddress", "a", "discoveryAddress")
+	cmd.PersistentFlags().StringVarP(&config.discoveryAddress, "discoveryAddress", "a", "", "discoveryAddress")
 	cmd.PersistentFlags().BoolVarP(&config.discovery, "discovery", "d", false, "discovery")
-	cmd.PersistentFlags().StringVar(&config.namespace, "namespace", "n", "namespace")
-	cmd.PersistentFlags().StringVar(&config.service, "service", "s", "service")
-	cmd.PersistentFlags().StringVar(&config.group, "group", "g", "group")
-	cmd.PersistentFlags().StringVar(&config.runCmd, "runCmd", "r", "runCmd")
+	cmd.PersistentFlags().StringVarP(&config.namespace, "namespace", "n", "", "namespace")
+	cmd.PersistentFlags().StringVarP(&config.service, "service", "s", "", "service")
+	cmd.PersistentFlags().StringVarP(&config.group, "group", "g", "", "group")
+	cmd.PersistentFlags().StringVarP(&config.runCmd, "runCmd", "r", "", "runCmd")
 	return &cmd
 }
 
@@ -61,13 +61,15 @@ func startAgent() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 	cfs := lcadConfigs(ctx)
+	app := NewApplication(config.runCmd)
 	if config.discovery {
 		discoveryChan := make(chan *confdv1.Configs, 1)
 		discoveryChan <- cfs
 		go runDiscovery(discoveryChan)
-		handleUpdateConfigs(context.Background(), discoveryChan, config.runCmd)
+		handleUpdateConfigs(context.Background(), discoveryChan, app)
 	} else {
-		if err := runExecApplication(cfs, config.runCmd); err != nil {
+		app.UpdateEnv(cfs.EnvConfigs)
+		if err := app.RunExecApplication(cfs.RunCmd); err != nil {
 			log.Fatal(err)
 		}
 	}

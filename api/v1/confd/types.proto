@@ -17,12 +17,20 @@ message EnvConfig {
 }
 
 message Configs {
+  enum RestartType {
+    None = 0;
+    WriteFiles = 1;
+    Kill = 2;
+    Command = 3;
+  }
   string version = 1;
-  // string run = 2;
+  string runCmd = 2;
   repeated FileConfig fileConfigs = 3;
   repeated EnvConfig envConfigs = 4;
   string service = 5;
   string group = 6;
+  RestartType restartType = 7;
+  string restartCommand = 8;
 }
 
 message ServerConfig {
