@@ -1,4 +1,4 @@
-package agent
+package cmd
 
 import (
 	"context"
@@ -27,7 +27,7 @@ func WriteConfigFiles(cf *confd.Configs) error {
 	return nil
 }
 
-func handleUpdateConfig(ctx context.Context, ch <-chan *confd.Configs) {
+func handleUpdateConfigs(ctx context.Context, ch <-chan *confd.Configs, runCmd string) {
 	for {
 		select {
 		case <-ctx.Done():

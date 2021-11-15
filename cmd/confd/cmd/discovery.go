@@ -1,8 +1,9 @@
-package agent
+package cmd
 
 import (
 	"context"
-	"grape/api/v1/confd"
+	"fmt"
+	confdv1 "grape/api/v1/confd"
 	"time"
 
 	"google.golang.org/grpc"
@@ -10,24 +11,33 @@ import (
 
 var (
 	disconveryConn   *grpc.ClientConn
-	disconveryClient confd.ConfdServerClient
+	disconveryClient confdv1.ConfdServerClient
 
 	// disconveryStreamLock sync.Mutex
 	// disconveryStream     confd.ConfdServer_StreamResourcesClient
 )
 
-func DialDiscoveryServer(ctx context.Context) {
+func runDiscovery(discoveryChan chan<- *confdv1.Configs) {
+	if err := dialDiscoveryServer(context.Background()); err != nil {
+		log.Fatal(err)
+	}
+	handleDiscovery(context.Background(), discoveryChan)
+}
+
+
+func dialDiscoveryServer(ctx context.Context) error {
 	var err error
 	dialTimeout, cancel := context.WithTimeout(ctx, time.Second*3)
 	defer cancel()
 	disconveryConn, err = grpc.DialContext(dialTimeout, config.discoveryAddress, grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("unable to connect to discovery server: %v", err)
+		return fmt.Errorf("unable to connect to discovery server: %v", err)
 	}
-	disconveryClient = confd.NewConfdServerClient(disconveryConn)
+	disconveryClient = confdv1.NewConfdServerClient(disconveryConn)
+	return nil
 }
 
-func handleDiscovery(ctx context.Context, cfs chan<- *confd.Configs) {
+func handleDiscovery(ctx context.Context, cfs chan<- *confdv1.Configs) {
 	for {
 		err := discoveryStream(ctx, cfs)
 		if err != nil {
@@ -40,10 +50,10 @@ func handleDiscovery(ctx context.Context, cfs chan<- *confd.Configs) {
 	}
 }
 
-func discoveryStream(ctx context.Context, cfs chan<- *confd.Configs) error {
+func discoveryStream(ctx context.Context, cfs chan<- *confdv1.Configs) error {
 	streamCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	discovery := &confd.Discovery{
+	discovery := &confdv1.Discovery{
 		Service: config.service,
 	}
 	disconveryStream, err := disconveryClient.StreamResources(streamCtx, discovery)

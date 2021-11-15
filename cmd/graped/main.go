@@ -3,6 +3,7 @@ package main
 import (
 	"grape/cmd/graped/server"
 	"grape/pkg/logger"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -26,5 +27,6 @@ func main() {
 	root.AddCommand(server.NewCmd())
 	if err := root.Execute(); err != nil {
 		log.Fatal(err)
+		time.Now().Format()
 	}
 }

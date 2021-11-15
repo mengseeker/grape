@@ -19,12 +19,3 @@ func GetGroupCode() string {
 func GetNamespace() string {
 	return os.Getenv(EnvNamespace)
 }
-
-func GetService() string {
-	ns := GetNamespace()
-	svc := GetServiceCode()
-	if ns != "" && svc != "" {
-		return ns + "/" + svc
-	}
-	return ""
-}

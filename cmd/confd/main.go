@@ -1,7 +1,7 @@
 package main
 
 import (
-	"grape/cmd/confd/agent"
+	"grape/cmd/confd/cmd"
 	"grape/pkg/logger"
 )
 
@@ -11,7 +11,7 @@ var (
 )
 
 func main() {
-	if err := agent.NewAgentCmd().Execute(); err != nil {
+	if err := cmd.NewCmd().Execute(); err != nil {
 		log.Fatal(err)
 	}
 }
