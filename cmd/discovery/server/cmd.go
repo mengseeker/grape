@@ -39,7 +39,11 @@ func NewCmd() *cobra.Command {
 func serve() {
 	initConfig()
 
-	ec, err := etcdcli.Connect(viper.GetString("etcd.address"))
+	ec, err := etcdcli.Connect(
+		viper.GetString("etcd.address"),
+		viper.GetString("etcd.username"),
+		viper.GetString("etcd.password"),
+	)
 	if err != nil {
 		log.Fatalf("unalble to connect to etcd: %v", err)
 	}

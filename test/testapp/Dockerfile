@@ -4,13 +4,13 @@ ENV GOPROXY https://goproxy.io
 WORKDIR /goworker
 COPY . .
 
-RUN CGO_ENABLED=0 go build -mod=vendor -a -ldflags '-s' -o apiserver cmd/apiserver/main.go
+RUN CGO_ENABLED=0 go build -mod=vendor -a -ldflags '-s' -o confd cmd/confd/main.go
 
 FROM alpine AS prod
 WORKDIR /goworker/
 RUN set -eux && sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories &&\
-  apk add -U tzdata && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && apk del tzdata &&\
+  apk add -U tzdata curl htop && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && apk del tzdata &&\
   rm -rf /tmp/ /var/cache/apk/
-COPY --from=build /goworker/apiserver /usr/local/bin/
+COPY --from=build /goworker/confd /usr/local/bin/
 
-CMD [ "apiserver", "s" ]
+CMD [ "htop" ]

@@ -16,20 +16,14 @@ var (
 	errUnsupportKind = errors.New("unsupport kind")
 )
 
-const (
-	ConfdHostPathBaseDir = "/opt/grape/confd/"
-)
-
 type InjectorConfig struct {
-	Cli              *etcdcli.Client
-	Log              logger.Logger
-	EnableConfd      bool
-	EnableMesh       bool
-	EnableView       bool
-	DiscoveryAddress string
-
-	ConfdAgentImage string
-	SidecarImage    string
+	Cli                    *etcdcli.Client
+	Log                    logger.Logger
+	EnableConfd            bool
+	EnableMesh             bool
+	EnableView             bool
+	InjectDiscoveryAddress string
+	MeshSidecarImage       string
 }
 
 func (cf *InjectorConfig) NewjectHandler() http.HandlerFunc {

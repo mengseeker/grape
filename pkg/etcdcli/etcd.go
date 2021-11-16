@@ -10,16 +10,18 @@ import (
 )
 
 type Client struct {
-	Cli *clientv3.Client
+	Cli         *clientv3.Client
 	ClusterCode string
 }
 
-func Connect(addrs string) (*Client, error) {
+func Connect(addrs, username, password string) (*Client, error) {
 	ends := strings.Split(addrs, ",")
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints:   ends,
 		DialTimeout: 5 * time.Second,
 		LogConfig:   logger.LoggerCfg(),
+		Username:    username,
+		Password:    password,
 	})
 	if err != nil {
 		return nil, err

@@ -3,28 +3,11 @@ package injector
 import (
 	"encoding/json"
 	"fmt"
-	"grape/api/v1/confd"
-	"grape/internal/confdserver"
-	"strconv"
-	"time"
+	"grape/internal/share"
 
 	"gomodules.xyz/jsonpatch/v3"
 	kubeApiAdmissionv1 "k8s.io/api/admission/v1"
 	corev1 "k8s.io/api/core/v1"
-)
-
-const (
-	ConfdEnableKey = "grape/confd"
-	MeshEnableKey  = "grape/mesh"
-	ViewEnableKey  = "grape/view"
-
-	ServiceCodeKey = "grape/service-code"
-	ServicePortKey = "grape/service-port"
-	GroupCodeKey   = "grape/group-code"
-)
-
-const (
-	ConfdAgentContainerName = "confd-agent"
 )
 
 func injectPod(cf *InjectorConfig, ar *kubeApiAdmissionv1.AdmissionReview) error {
@@ -46,21 +29,21 @@ func injectPod(cf *InjectorConfig, ar *kubeApiAdmissionv1.AdmissionReview) error
 	cf.Log.Debugf("Object: %v", string(req.Object.Raw))
 
 	ann := pod.Annotations
-	if cf.EnableConfd && ann[ConfdEnableKey] != "disable" {
+	if cf.EnableConfd && ann[share.Annotation_ConfdEnableKey] != "false" {
 		cf.Log.Debugf("inject confd for %s/%s", pod.Namespace, podName)
 		if err := doInjectConfd(cf, &pod, mergedPod); err != nil {
 			return err
 		}
 	}
 
-	if cf.EnableMesh && ann[MeshEnableKey] != "disable" {
+	if cf.EnableMesh && ann[share.Annotation_MeshEnableKey] != "false" {
 		cf.Log.Debugf("inject mesh for %s/%s", pod.Namespace, podName)
 		if err := doInjectMesh(cf, &pod, mergedPod); err != nil {
 			return err
 		}
 	}
 
-	if cf.EnableView && ann[ViewEnableKey] != "disable" {
+	if cf.EnableView && ann[share.Annotation_ViewEnableKey] != "false" {
 		cf.Log.Debugf("inject view for %s/%s", pod.Namespace, podName)
 		if err := doInjectView(cf, &pod, mergedPod); err != nil {
 			return err
@@ -98,57 +81,34 @@ func patchPodResponse(ar *kubeApiAdmissionv1.AdmissionReview, pod, merge *corev1
 }
 
 func doInjectConfd(ijf *InjectorConfig, pod, merge *corev1.Pod) error {
-	serviceCode := pod.Annotations[ServiceCodeKey]
+	serviceCode := pod.Annotations[share.Annotation_ServiceCodeKey]
 	if serviceCode == "" {
-		return fmt.Errorf("annotation %s not found", ServiceCodeKey)
+		return fmt.Errorf("annotation %s not found", share.Annotation_ServiceCodeKey)
 	}
-	groupCode := pod.Annotations[GroupCodeKey]
+	groupCode := pod.Annotations[share.Annotation_GroupCodeKey]
 	ijf.Log.Debugf("inject serverConfigs %s/%s(%s)", pod.Namespace, serviceCode, groupCode)
 	appContainer, err := getAppContatiner(merge)
 	if err != nil {
 		return err
 	}
-	serverConfigs, rev, err := confdserver.GetServiceConfigs(ijf.Cli, pod.Namespace, serviceCode, groupCode, 0)
-	if err != nil {
-		return err
+	args := []string{"-a", ijf.InjectDiscoveryAddress}
+	args = append(args, "-s", serviceCode)
+	args = append(args, "-n", pod.Namespace)
+	args = append(args, "-g", groupCode)
+
+	// disable confd agent discovery, just download configs
+	if pod.Annotations[share.Annotation_Confd_Discovery] != "true" {
+		args = append(args, "-d")
 	}
-	if serverConfigs == nil {
-		return nil
+
+	// Cover the runCmd defined by conf-server force
+	if pod.Annotations[share.Annotation_Confd_RunCmd] != "" {
+		args = append(args, "-r", pod.Annotations[share.Annotation_Confd_RunCmd])
 	}
-	injectEnv(appContainer, serverConfigs.EnvConfigs)
-	injectFiles(ijf, serverConfigs.FileConfigs, appContainer, merge, serviceCode, groupCode, rev)
+
+	appContainer.Command = []string{"confd"}
+	appContainer.Args = args
 	return nil
-}
-
-func injectFiles(ijf *InjectorConfig, cf []*confd.FileConfig, ac *corev1.Container, pod *corev1.Pod, serviceCode, groupCode string, rev int64) {
-	c := corev1.Container{}
-	c.Name = ConfdAgentContainerName
-	c.Image = ijf.ConfdAgentImage
-	c.ImagePullPolicy = corev1.PullIfNotPresent
-	c.Args = append(c.Args, "-s", fmt.Sprintf("%s/%s", pod.Namespace, serviceCode))
-	c.Args = append(c.Args, "-g", groupCode)
-	c.Args = append(c.Args, "-a", ijf.DiscoveryAddress)
-	c.Args = append(c.Args, "-l", strconv.Itoa(int(rev)))
-	for _, f := range cf {
-		hf := fmt.Sprintf("%s%s/%d", ConfdHostPathBaseDir, time.Now().Format("2006-01-02"), time.Now().UnixNano())
-		var hp corev1.HostPathType = "FileOrCreate"
-		pod.Spec.Volumes = append(pod.Spec.Volumes, corev1.Volume{
-			Name: f.Name, VolumeSource: corev1.VolumeSource{
-				HostPath: &corev1.HostPathVolumeSource{
-					Path: hf, Type: &hp,
-				},
-			},
-		})
-		c.VolumeMounts = append(c.VolumeMounts, corev1.VolumeMount{Name: f.Name, MountPath: f.Path, ReadOnly: false})
-		ac.VolumeMounts = append(ac.VolumeMounts, corev1.VolumeMount{Name: f.Name, MountPath: f.Path, ReadOnly: true})
-	}
-	pod.Spec.InitContainers = append(pod.Spec.InitContainers, c)
-}
-
-func injectEnv(c *corev1.Container, env []*confd.EnvConfig) {
-	for _, e := range env {
-		appendContainerEnv(c, e.Key, e.Value)
-	}
 }
 
 func doInjectMesh(cf *InjectorConfig, pod, merge *corev1.Pod) error {

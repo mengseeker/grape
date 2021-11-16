@@ -8,22 +8,23 @@ apiserver:
   address: :15010
 
 injector:
-  enable: false
-  address: :8082
+  address: :8443
   cert: install/injector_cert.pem
   cert_key: install/injector_key.pem
-  discovery_address: grape-discovery:15020
+  inject_discovery_address: discovery.grape-system:15020
   enable_confd: true
-  enable_mesh: true
   enable_view: true
-  confd_agent_image: repo.nexttao.com.cn/common/confd-agent:v1
-  sidecar_image: repo.nexttao.com.cn/common/grape-sidecar:v1
+
+  enable_mesh: true
+  mesh_sidecar_image: repo.nexttao.com.cn/common/grape-sidecar:v1
 
 auth:
   address: :11001
 
 etcd:
   address: etcd:2379
+  username:
+  password:
 
 discovery:
   address: :15020

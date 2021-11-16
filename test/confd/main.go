@@ -22,16 +22,16 @@ func main() {
 			{Path: "/tmp/grape_demo.yaml", Content: "aa: 1"},
 			{Path: "logs/not_exist.yaml", Content: "aa: 1"},
 		},
-		// RestartType: confd.Configs_Kill,
+		RestartType: confd.Configs_Kill,
 		// RestartType:    confd.Configs_WriteFiles,
-		RestartType:    confd.Configs_Command,
+		// RestartType:    confd.Configs_Command,
 		RunCmd:         "top",
 		RestartCommand: "apk add htop",
 	}
 	_, err = cli.Set(context.Background(), &confd.SetRequest{
 		ServerConfig: &confd.ServerConfig{
 			Namespace: "demo",
-			Service:   "order",
+			Service:   "testapp",
 			Default:   &cf,
 		}})
 	if err != nil {

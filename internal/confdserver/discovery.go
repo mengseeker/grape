@@ -9,10 +9,6 @@ import (
 	"sync"
 )
 
-const (
-	ServerKeyPrefix = "configs/"
-)
-
 type server struct {
 	confd.UnimplementedConfdServerServer
 	log logger.Logger

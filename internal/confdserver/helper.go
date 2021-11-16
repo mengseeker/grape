@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"grape/api/v1/confd"
+	"grape/internal/share"
 	"grape/pkg/etcdcli"
 	"time"
 
@@ -30,7 +31,7 @@ func GetGroupConfig(config *confd.ServerConfig, group string) *confd.Configs {
 }
 
 func Key(namespace, service string) string {
-	return ServerKeyPrefix + namespace + "/" + service
+	return share.ServerKeyPrefix + namespace + "/" + service
 }
 
 func GetServiceConfigs(cli *etcdcli.Client, namespace, service, group string, loadVersion int64) (*confd.Configs, int64, error) {

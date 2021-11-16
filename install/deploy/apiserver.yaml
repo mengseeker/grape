@@ -1,0 +1,74 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: grape-apiserver
+  name: grape-apiserver
+  namespace: grape-system
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: grape-apiserver
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: grape-apiserver
+    spec:
+      containers:
+      - image: repo.nexttao.com.cn/common/grape-apiserver:v1.01
+        imagePullPolicy: IfNotPresent
+        name: grape-apiserver
+        ports:
+        - containerPort: 15010
+          name: http
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 1000Mi
+          requests:
+            cpu: 500m
+            memory: 500Mi
+        volumeMounts:
+        - mountPath: /goworker/bootstrap.yaml
+          name: grape-config
+          subPath: bootstrap.yaml
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      serviceAccount: grape
+      serviceAccountName: grape
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: grape-config
+        name: grape-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grape-apiserver
+  namespace: grape-system
+spec:
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: http
+    port: 15010
+    protocol: TCP
+    targetPort: 15010
+  selector:
+    app: grape-apiserver
+  sessionAffinity: None
+  type: ClusterIP

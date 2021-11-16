@@ -83,7 +83,7 @@ func HandleSource(tran logs.Transmitter, ctx context.Context) {
 }
 
 func RunConsumer(tran logs.Transmitter, ctx context.Context) {
-	env := share.GetEnvironment()
+	env := "default"
 	cluster := share.GetCluster()
 	// elasticsearch
 	if config.IsConfigOutEs() {

@@ -1,0 +1,26 @@
+FROM golang:1.16 AS build
+ENV GO111MODULE on
+ENV GOPROXY https://goproxy.io
+WORKDIR /goworker
+
+# COPY go.mod go.sum ./
+# COPY api api
+# COPY cmd cmd
+# COPY internal internal
+# COPY pkg pkg
+# COPY vendor vendor
+COPY . .
+
+RUN CGO_ENABLED=0 go build -mod=vendor -a -ldflags '-s' -o injector cmd/injector/main.go
+
+FROM alpine AS prod
+WORKDIR /goworker/
+RUN set -eux && sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories &&\
+  apk add -U tzdata && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && apk del tzdata &&\
+  rm -rf /tmp/ /var/cache/apk/
+COPY --from=build /goworker/injector /usr/local/bin/
+
+COPY install/injector_cert.pem /goworker/install/injector_cert.pem
+COPY install/injector_key.pem /goworker/install/injector_key.pem
+
+CMD [ "injector", "s" ]

@@ -1,3 +1,5 @@
+Version = v1.01
+
 
 # ********************** all **************************
 .PHONY: buildall
@@ -28,10 +30,43 @@ generate_injector_tls:
 mwebhook_cert_base64:
 	sh -x tools/mwebhook_cert_base64.sh
 
+# ********************** docker build **************************
+.PHONY: dockerbuild
+dockerbuild: dockerbuild-apiserver dockerbuild-discovery dockerbuild-injector
+
+.PHONY: dockerbuild-apiserver
+dockerbuild-apiserver:
+	docker build -f docker/Dockerfile.apiserver -t repo.nexttao.com.cn/common/grape-apiserver:${Version} .
+
+.PHONY: dockerbuild-discovery
+dockerbuild-discovery:
+	docker build -f docker/Dockerfile.discovery -t repo.nexttao.com.cn/common/grape-discovery:${Version} .
+
+.PHONY: dockerbuild-injector
+dockerbuild-injector:
+	docker build -f docker/Dockerfile.injector -t repo.nexttao.com.cn/common/grape-injector:${Version} .
+
+
+.PHONY: dockerpush
+dockerpush: dockerpush-apiserver dockerpush-discovery dockerpush-injector
+
+.PHONY: dockerpush-apiserver
+dockerpush-apiserver:
+	docker push repo.nexttao.com.cn/common/grape-apiserver:${Version}
+
+.PHONY: dockerpush-discovery
+dockerpush-discovery:
+	docker push repo.nexttao.com.cn/common/grape-discovery:${Version}
+
+.PHONY: dockerpush-injector
+dockerpush-injector:
+	docker push repo.nexttao.com.cn/common/grape-injector:${Version}
+
+
+
 # ********************** test **************************
 dockercompose-extauth:
 	cd test/extauth && docker-compose build && docker-compose up
-
 
 
 .PHONY: updatedist

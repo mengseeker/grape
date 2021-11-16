@@ -100,6 +100,7 @@ func (app *Application) RestartByKill(runCmd string) error {
 
 	app.lock.Lock()
 	defer app.lock.Unlock()
+	app.signKill = false
 	app.cmd = nil
 
 	if runCmd == "" && app.runCmd == "" {

@@ -1,0 +1,50 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: testapp
+  name: testapp
+  namespace: demo
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: testapp
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: testapp
+      annotations:
+        grape/service-code: testapp
+        grape/group-code: testapp-demo-v1
+    spec:
+      containers:
+      - image: repo.nexttao.com.cn/common/testapp:v1.01
+        imagePullPolicy: IfNotPresent
+        name: testapp
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: testapp
+  namespace: demo
+spec:
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: testapp
+  sessionAffinity: None
+  type: ClusterIP

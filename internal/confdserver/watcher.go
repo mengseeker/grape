@@ -3,6 +3,7 @@ package confdserver
 import (
 	"context"
 	"grape/api/v1/confd"
+	"grape/internal/share"
 	"grape/pkg/etcdcli"
 	"grape/pkg/logger"
 	"sync"
@@ -29,7 +30,7 @@ func (w *watcher) watchLoop(ctx context.Context, log logger.Logger) {
 			}
 		}
 	}
-	w.cli.WatchPrefixEvents(ctx, ServerKeyPrefix, log, handle, handle, nil)
+	w.cli.WatchPrefixEvents(ctx, share.ServerKeyPrefix, log, handle, handle, nil)
 }
 
 func (w *watcher) notify(key, group string, c chan<- *confd.Configs) {

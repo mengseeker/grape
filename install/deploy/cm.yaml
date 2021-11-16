@@ -1,0 +1,38 @@
+apiVersion: v1
+data:
+  bootstrap.yaml: |
+    cluster_code: dev
+    logging_level: debug
+
+    redis:
+      address: :6379
+
+    apiserver:
+      address: :15010
+
+    injector:
+      address: :8443
+      cert: install/injector_cert.pem
+      cert_key: install/injector_key.pem
+      inject_discovery_address: grape-discovery.grape-system:15020
+      enable_confd: true
+      enable_view: true
+
+      enable_mesh: true
+      mesh_sidecar_image: repo.nexttao.com.cn/common/grape-sidecar:v1
+
+    auth:
+      address: :11001
+
+    etcd:
+      address: etcd:2379
+      username: root
+      password: dHuEk8mXBI
+
+    discovery:
+      address: :15020
+
+kind: ConfigMap
+metadata:
+  name: grape-config
+  namespace: grape-system
