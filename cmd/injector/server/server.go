@@ -65,7 +65,6 @@ func runInjectorServer(cli *etcdcli.Client) {
 		InjectDiscoveryAddress: injectDiscoveryAddress,
 		EnableConfd:            viper.GetBool("injector.enable_confd"),
 		EnableMesh:             viper.GetBool("injector.enable_mesh"),
-		EnableView:             viper.GetBool("injector.enable_view"),
 		MeshSidecarImage:       viper.GetString("injector.mesh_sidecar_image"),
 	}
 	log.Infof("listenning injector server at %s", address)
@@ -80,7 +79,6 @@ func initConfig() {
 	viper.SetDefault("injector.address", "0.0.0.0:8443")
 	viper.SetDefault("injector.enable_confd", true)
 	viper.SetDefault("injector.enable_mesh", true)
-	viper.SetDefault("injector.enable_view", true)
 	viper.SetDefault("injector.inject_discovery_address", "grape-discovery.grape-system:15020")
 
 	share.InitConfig(cfgFile, log)

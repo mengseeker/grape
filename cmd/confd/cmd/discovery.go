@@ -45,7 +45,7 @@ func handleDiscovery(ctx context.Context, cfs chan<- *confdv1.Configs) {
 			log.Errorf("discoveryStream exit unexpected")
 		}
 		time.Sleep(time.Second * 3)
-		log.Info("restart discoveryStream")
+		log.Info("retry discoveryStream")
 	}
 }
 
@@ -53,11 +53,10 @@ func discoveryStream(ctx context.Context, cfs chan<- *confdv1.Configs) error {
 	streamCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	discovery := &confdv1.Discovery{
-		Namespace: config.namespace,
-		Service:   config.service,
-		Group:     config.group,
+		ProjectName: config.project,
+		Group:       config.group,
 	}
-	disconveryStream, err := disconveryClient.StreamResources(streamCtx, discovery)
+	disconveryStream, err := disconveryClient.StreamDiscovery(streamCtx, discovery)
 	if err != nil {
 		return err
 	}

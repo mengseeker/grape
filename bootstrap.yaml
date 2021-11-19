@@ -22,7 +22,8 @@ auth:
   address: :11001
 
 etcd:
-  address: etcd:2379
+  # address: etcd:2379
+  address: 127.0.0.1:2379
   username:
   password:
 

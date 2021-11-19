@@ -15,8 +15,8 @@ func WriteConfigFiles(cf *confd.Configs) error {
 	if cf.Version == "" {
 		return nil
 	}
-	if lastConfigVersion == cf.Version {
-		log.Infof("version %s loaded, skip update", cf.Version)
+	if lastConfigVersion >= cf.Version {
+		log.Infof("version %s loaded, ignore update", cf.Version)
 		return nil
 	}
 	for _, file := range cf.FileConfigs {
@@ -55,7 +55,7 @@ func handleUpdateConfigs(ctx context.Context, ch <-chan *confd.Configs, app *App
 
 func updateConfig(cf *confd.Configs, app *Application) error {
 	log.Infof("update configs, type: %v", cf.RestartType)
-	if cf.RestartType == confd.Configs_None {
+	if cf.RestartType == confd.RestartType_None {
 		log.Info("skip update")
 		return nil
 	}
@@ -65,14 +65,11 @@ func updateConfig(cf *confd.Configs, app *Application) error {
 		return err
 	}
 
-	// update application envs, not apply to runtime
-	app.UpdateEnv(cf.EnvConfigs)
-
 	// do restart application
 	switch cf.RestartType {
-	case confd.Configs_Kill:
+	case confd.RestartType_Kill:
 		return app.RestartByKill(cf.RunCmd)
-	case confd.Configs_Command:
+	case confd.RestartType_Command:
 		return app.RestartByCommand(cf.RunCmd, cf.RestartCommand)
 	}
 	return nil

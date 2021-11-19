@@ -18,8 +18,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ConfdServerClient interface {
-	StreamResources(ctx context.Context, in *Discovery, opts ...grpc.CallOption) (ConfdServer_StreamResourcesClient, error)
-	Download(ctx context.Context, in *DownloadRequest, opts ...grpc.CallOption) (*DownloadResponse, error)
+	StreamDiscovery(ctx context.Context, in *Discovery, opts ...grpc.CallOption) (ConfdServer_StreamDiscoveryClient, error)
 }
 
 type confdServerClient struct {
@@ -30,12 +29,12 @@ func NewConfdServerClient(cc grpc.ClientConnInterface) ConfdServerClient {
 	return &confdServerClient{cc}
 }
 
-func (c *confdServerClient) StreamResources(ctx context.Context, in *Discovery, opts ...grpc.CallOption) (ConfdServer_StreamResourcesClient, error) {
-	stream, err := c.cc.NewStream(ctx, &ConfdServer_ServiceDesc.Streams[0], "/grape.api.v1.confd.ConfdServer/StreamResources", opts...)
+func (c *confdServerClient) StreamDiscovery(ctx context.Context, in *Discovery, opts ...grpc.CallOption) (ConfdServer_StreamDiscoveryClient, error) {
+	stream, err := c.cc.NewStream(ctx, &ConfdServer_ServiceDesc.Streams[0], "/api.v1.confd.ConfdServer/StreamDiscovery", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &confdServerStreamResourcesClient{stream}
+	x := &confdServerStreamDiscoveryClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -45,16 +44,16 @@ func (c *confdServerClient) StreamResources(ctx context.Context, in *Discovery, 
 	return x, nil
 }
 
-type ConfdServer_StreamResourcesClient interface {
+type ConfdServer_StreamDiscoveryClient interface {
 	Recv() (*Configs, error)
 	grpc.ClientStream
 }
 
-type confdServerStreamResourcesClient struct {
+type confdServerStreamDiscoveryClient struct {
 	grpc.ClientStream
 }
 
-func (x *confdServerStreamResourcesClient) Recv() (*Configs, error) {
+func (x *confdServerStreamDiscoveryClient) Recv() (*Configs, error) {
 	m := new(Configs)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -62,21 +61,11 @@ func (x *confdServerStreamResourcesClient) Recv() (*Configs, error) {
 	return m, nil
 }
 
-func (c *confdServerClient) Download(ctx context.Context, in *DownloadRequest, opts ...grpc.CallOption) (*DownloadResponse, error) {
-	out := new(DownloadResponse)
-	err := c.cc.Invoke(ctx, "/grape.api.v1.confd.ConfdServer/Download", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // ConfdServerServer is the server API for ConfdServer service.
 // All implementations must embed UnimplementedConfdServerServer
 // for forward compatibility
 type ConfdServerServer interface {
-	StreamResources(*Discovery, ConfdServer_StreamResourcesServer) error
-	Download(context.Context, *DownloadRequest) (*DownloadResponse, error)
+	StreamDiscovery(*Discovery, ConfdServer_StreamDiscoveryServer) error
 	mustEmbedUnimplementedConfdServerServer()
 }
 
@@ -84,11 +73,8 @@ type ConfdServerServer interface {
 type UnimplementedConfdServerServer struct {
 }
 
-func (UnimplementedConfdServerServer) StreamResources(*Discovery, ConfdServer_StreamResourcesServer) error {
-	return status.Errorf(codes.Unimplemented, "method StreamResources not implemented")
-}
-func (UnimplementedConfdServerServer) Download(context.Context, *DownloadRequest) (*DownloadResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Download not implemented")
+func (UnimplementedConfdServerServer) StreamDiscovery(*Discovery, ConfdServer_StreamDiscoveryServer) error {
+	return status.Errorf(codes.Unimplemented, "method StreamDiscovery not implemented")
 }
 func (UnimplementedConfdServerServer) mustEmbedUnimplementedConfdServerServer() {}
 
@@ -103,63 +89,40 @@ func RegisterConfdServerServer(s grpc.ServiceRegistrar, srv ConfdServerServer) {
 	s.RegisterService(&ConfdServer_ServiceDesc, srv)
 }
 
-func _ConfdServer_StreamResources_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _ConfdServer_StreamDiscovery_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(Discovery)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(ConfdServerServer).StreamResources(m, &confdServerStreamResourcesServer{stream})
+	return srv.(ConfdServerServer).StreamDiscovery(m, &confdServerStreamDiscoveryServer{stream})
 }
 
-type ConfdServer_StreamResourcesServer interface {
+type ConfdServer_StreamDiscoveryServer interface {
 	Send(*Configs) error
 	grpc.ServerStream
 }
 
-type confdServerStreamResourcesServer struct {
+type confdServerStreamDiscoveryServer struct {
 	grpc.ServerStream
 }
 
-func (x *confdServerStreamResourcesServer) Send(m *Configs) error {
+func (x *confdServerStreamDiscoveryServer) Send(m *Configs) error {
 	return x.ServerStream.SendMsg(m)
-}
-
-func _ConfdServer_Download_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DownloadRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ConfdServerServer).Download(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grape.api.v1.confd.ConfdServer/Download",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ConfdServerServer).Download(ctx, req.(*DownloadRequest))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 // ConfdServer_ServiceDesc is the grpc.ServiceDesc for ConfdServer service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var ConfdServer_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "grape.api.v1.confd.ConfdServer",
+	ServiceName: "api.v1.confd.ConfdServer",
 	HandlerType: (*ConfdServerServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "Download",
-			Handler:    _ConfdServer_Download_Handler,
-		},
-	},
+	Methods:     []grpc.MethodDesc{},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "StreamResources",
-			Handler:       _ConfdServer_StreamResources_Handler,
+			StreamName:    "StreamDiscovery",
+			Handler:       _ConfdServer_StreamDiscovery_Handler,
 			ServerStreams: true,
 		},
 	},
-	Metadata: "grape/api/v1/confd/discovery.proto",
+	Metadata: "api/v1/confd/discovery.proto",
 }

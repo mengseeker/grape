@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+import "api/v1/confd/types.proto";
+
+package api.v1.confd;
+option go_package = "grape/api/v1/confd";
+
+message ApiRequest {
+  string project_name = 1;
+  Project project = 2;
+}
+
+message ApiResponse{
+  int32 code = 1;
+  string message = 2;
+  Project Project = 3;
+}
+
+service ApiServer {
+  rpc Set(ApiRequest) returns (ApiResponse) {};
+  rpc Get(ApiRequest) returns (ApiResponse) {};
+  rpc Del(ApiRequest) returns (ApiResponse) {};
+}

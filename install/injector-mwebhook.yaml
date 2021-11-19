@@ -22,13 +22,13 @@ webhooks:
   name: pod.injector.grape
   namespaceSelector:
     matchExpressions:
-    - key: grape/enable_injection
+    - key: grape/enable
       operator: In
       values:
       - "true"
   objectSelector:
     matchExpressions:
-    - key: grape/enable_injection
+    - key: grape/enable
       operator: In
       values:
       - "true"

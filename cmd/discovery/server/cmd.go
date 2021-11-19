@@ -2,10 +2,8 @@ package server
 
 import (
 	"grape/api/v1/confd"
-	"grape/api/v1/view"
 	"grape/internal/confdserver"
 	"grape/internal/share"
-	"grape/internal/viewserver"
 	"grape/pkg/etcdcli"
 	"grape/pkg/logger"
 	"net"
@@ -14,8 +12,6 @@ import (
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 )
-
-const ()
 
 var (
 	cfgFile string
@@ -49,12 +45,6 @@ func serve() {
 	}
 
 	grpcServer := grpc.NewServer()
-
-	// V3server()
-	// dnsServer()
-
-	ls := viewserver.NewServer(log, ec)
-	view.RegisterDiscoveryServerServer(grpcServer, ls)
 
 	cs := confdserver.NewServer(log, ec)
 	confd.RegisterConfdServerServer(grpcServer, cs)

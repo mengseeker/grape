@@ -2,10 +2,8 @@ package server
 
 import (
 	"grape/api/v1/confd"
-	"grape/api/v1/view"
 	"grape/internal/confdserver"
 	"grape/internal/share"
-	"grape/internal/viewserver"
 	"grape/pkg/etcdcli"
 	"grape/pkg/logger"
 	"net"
@@ -26,8 +24,8 @@ func NewCmd() *cobra.Command {
 	cmd := cobra.Command{
 		Use:     "server",
 		Aliases: []string{"s"},
-		Short:   "grape apiserver",
-		Long:    `grape apiserver`,
+		Short:   "grape controller",
+		Long:    `grape controller`,
 		Run: func(cmd *cobra.Command, args []string) {
 			serve()
 		},
@@ -53,10 +51,6 @@ func serve() {
 	// config apiserver
 	cas := confdserver.NewApiServer(log, ec)
 	confd.RegisterApiServerServer(grpcServer, cas)
-
-	// log apiserver
-	las := viewserver.NewApiServer(log, ec)
-	view.RegisterApiServerServer(grpcServer, las)
 
 	// gw apiserver
 	// mesh apiserver

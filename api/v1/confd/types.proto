@@ -1,8 +1,6 @@
 syntax = "proto3";
 
-import "grape/api/v1/core/common.proto";
-
-package grape.api.v1.confd;
+package api.v1.confd;
 option go_package = "grape/api/v1/confd";
 
 message FileConfig {
@@ -11,32 +9,25 @@ message FileConfig {
   string content = 3;
 }
 
-message EnvConfig {
-  string key = 1;
-  string value = 2;
+enum RestartType {
+  None = 0;
+  WriteFiles = 1;
+  Kill = 2;
+  Command = 3;
 }
 
 message Configs {
-  enum RestartType {
-    None = 0;
-    WriteFiles = 1;
-    Kill = 2;
-    Command = 3;
-  }
   string version = 1;
-  string runCmd = 2;
-  repeated FileConfig fileConfigs = 3;
-  repeated EnvConfig envConfigs = 4;
-  // string service = 5;
-  string group = 6;
-  RestartType restartType = 7;
-  string restartCommand = 8;
+  string group = 2;
+  string runCmd = 3;
+  repeated FileConfig fileConfigs = 4;
+  RestartType restartType = 5;
+  string restartCommand = 6;
 }
 
-message ServerConfig {
+message Project {
   string version = 1;
-  string namespace = 2;
-  string service = 3;
-  Configs default = 4;
-  map<string, Configs> groupConfigs = 5;
+  string name = 2;
+  int32 nodeUpdateInterval = 3;
+  map<string, Configs> groupConfigs = 4;
 }

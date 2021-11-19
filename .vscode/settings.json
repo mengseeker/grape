@@ -1,0 +1,5 @@
+{
+    "protoc": {
+        "compile_on_save": false,
+    }
+}

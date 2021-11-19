@@ -2,6 +2,7 @@ package injector
 
 import (
 	"fmt"
+	"strings"
 
 	kubeApiAdmissionv1 "k8s.io/api/admission/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -71,13 +72,23 @@ func getAppContatiner(pod *corev1.Pod) (*corev1.Container, error) {
 	return nil, errApplicationContainerNotfound
 }
 
-func appendContainerEnv(c *corev1.Container, key, value string) {
-	for i := 0; i < len(c.Env); i++ {
-		if c.Env[i].Name == key {
-			c.Env[i].Value = value
-			c.Env[i].ValueFrom = nil
-			return
+// func appendContainerEnv(c *corev1.Container, key, value string) {
+// 	for i := 0; i < len(c.Env); i++ {
+// 		if c.Env[i].Name == key {
+// 			c.Env[i].Value = value
+// 			c.Env[i].ValueFrom = nil
+// 			return
+// 		}
+// 	}
+// 	c.Env = append(c.Env, corev1.EnvVar{Name: key, Value: value})
+// }
+
+func getDeploymentName(podGenerateName string) string {
+	if podGenerateName != "" && podGenerateName[len(podGenerateName)-1] == '-' {
+		idx := strings.LastIndex(podGenerateName[:len(podGenerateName)-2], "-")
+		if idx > 0 {
+			return podGenerateName[:idx]
 		}
 	}
-	c.Env = append(c.Env, corev1.EnvVar{Name: key, Value: value})
+	return ""
 }

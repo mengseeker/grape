@@ -4,65 +4,48 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"grape/api/v1/confd"
+	confdv1 "grape/api/v1/confd"
 	"grape/internal/share"
 	"grape/pkg/etcdcli"
 	"time"
-
-	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
-func UnmarshalServiceConfig(raw []byte) (*confd.ServerConfig, error) {
-	config := confd.ServerConfig{}
-	err := json.Unmarshal(raw, &config)
-	return &config, err
+func UnmarshalProject(raw []byte) (*confdv1.Project, error) {
+	project := confdv1.Project{}
+	err := json.Unmarshal(raw, &project)
+	return &project, err
 }
 
-func MarshalServiceConfig(config *confd.ServerConfig) []byte {
-	j, _ := json.Marshal(config)
+func MarshalProject(project *confdv1.Project) []byte {
+	j, _ := json.Marshal(project)
 	return j
 }
 
-func GetGroupConfig(config *confd.ServerConfig, group string) *confd.Configs {
-	if cf, ok := config.GroupConfigs[group]; ok {
+func GetGroupConfig(project *confdv1.Project, group string) *confdv1.Configs {
+	if cf, ok := project.GroupConfigs[group]; ok {
 		return cf
 	}
-	return config.Default
+	return project.GroupConfigs[share.ConfdDefaultGroupName]
 }
 
-func Key(namespace, service string) string {
-	return share.ServerKeyPrefix + namespace + "/" + service
+func Key(projectName string) string {
+	return share.ServerKeyPrefix + projectName
 }
 
-func GetServiceConfigs(cli *etcdcli.Client, namespace, service, group string, loadVersion int64) (*confd.Configs, int64, error) {
+func GetProjectConfigs(cli *etcdcli.Client, projectName, group string) (*confdv1.Configs, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
-	key := Key(namespace, service)
-	ops := []clientv3.OpOption{}
-	if loadVersion != 0 {
-		ops = append(ops, clientv3.WithRev(loadVersion))
-	}
-	resp, err := cli.Cli.Get(ctx, key, ops...)
+	key := Key(projectName)
+	resp, err := cli.Cli.Get(ctx, key)
 	if err != nil {
-		return nil, 0, fmt.Errorf("unalble to get confis form etcd: %v", err)
+		return nil, fmt.Errorf("unalble to get project form etcd: %v", err)
 	}
-	// if config not found, return an emptys
 	if resp.Count == 0 {
-		return &confd.Configs{}, 0, nil
+		return nil, fmt.Errorf("project %q nou found", projectName)
 	}
-	sf, err := UnmarshalServiceConfig(resp.Kvs[0].Value)
+	f, err := UnmarshalProject(resp.Kvs[0].Value)
 	if err != nil {
-		return nil, 0, fmt.Errorf("unmarshal configs err: %v", err)
+		return nil, fmt.Errorf("unmarshal project err: %v", err)
 	}
-	return GetGroupConfig(sf, group), resp.Header.Revision, nil
-}
-
-func GetRevServiceConfigs(cli *etcdcli.Client, namespace, service, group string, loadVersion int64) (*confd.Configs, error) {
-	cf, _, err := GetServiceConfigs(cli, namespace, service, group, loadVersion)
-	return cf, err
-}
-
-func GetLatestServiceConfigs(cli *etcdcli.Client, namespace, service, group string) (*confd.Configs, error) {
-	cf, _, err := GetServiceConfigs(cli, namespace, service, group, 0)
-	return cf, err
+	return GetGroupConfig(f, group), nil
 }

@@ -18,9 +18,9 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ApiServerClient interface {
-	Set(ctx context.Context, in *SetRequest, opts ...grpc.CallOption) (*SetResponse, error)
-	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error)
-	Del(ctx context.Context, in *DelRequest, opts ...grpc.CallOption) (*DelResponse, error)
+	Set(ctx context.Context, in *ApiRequest, opts ...grpc.CallOption) (*ApiResponse, error)
+	Get(ctx context.Context, in *ApiRequest, opts ...grpc.CallOption) (*ApiResponse, error)
+	Del(ctx context.Context, in *ApiRequest, opts ...grpc.CallOption) (*ApiResponse, error)
 }
 
 type apiServerClient struct {
@@ -31,27 +31,27 @@ func NewApiServerClient(cc grpc.ClientConnInterface) ApiServerClient {
 	return &apiServerClient{cc}
 }
 
-func (c *apiServerClient) Set(ctx context.Context, in *SetRequest, opts ...grpc.CallOption) (*SetResponse, error) {
-	out := new(SetResponse)
-	err := c.cc.Invoke(ctx, "/grape.api.v1.confd.ApiServer/Set", in, out, opts...)
+func (c *apiServerClient) Set(ctx context.Context, in *ApiRequest, opts ...grpc.CallOption) (*ApiResponse, error) {
+	out := new(ApiResponse)
+	err := c.cc.Invoke(ctx, "/api.v1.confd.ApiServer/Set", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *apiServerClient) Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error) {
-	out := new(GetResponse)
-	err := c.cc.Invoke(ctx, "/grape.api.v1.confd.ApiServer/Get", in, out, opts...)
+func (c *apiServerClient) Get(ctx context.Context, in *ApiRequest, opts ...grpc.CallOption) (*ApiResponse, error) {
+	out := new(ApiResponse)
+	err := c.cc.Invoke(ctx, "/api.v1.confd.ApiServer/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *apiServerClient) Del(ctx context.Context, in *DelRequest, opts ...grpc.CallOption) (*DelResponse, error) {
-	out := new(DelResponse)
-	err := c.cc.Invoke(ctx, "/grape.api.v1.confd.ApiServer/Del", in, out, opts...)
+func (c *apiServerClient) Del(ctx context.Context, in *ApiRequest, opts ...grpc.CallOption) (*ApiResponse, error) {
+	out := new(ApiResponse)
+	err := c.cc.Invoke(ctx, "/api.v1.confd.ApiServer/Del", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -62,9 +62,9 @@ func (c *apiServerClient) Del(ctx context.Context, in *DelRequest, opts ...grpc.
 // All implementations must embed UnimplementedApiServerServer
 // for forward compatibility
 type ApiServerServer interface {
-	Set(context.Context, *SetRequest) (*SetResponse, error)
-	Get(context.Context, *GetRequest) (*GetResponse, error)
-	Del(context.Context, *DelRequest) (*DelResponse, error)
+	Set(context.Context, *ApiRequest) (*ApiResponse, error)
+	Get(context.Context, *ApiRequest) (*ApiResponse, error)
+	Del(context.Context, *ApiRequest) (*ApiResponse, error)
 	mustEmbedUnimplementedApiServerServer()
 }
 
@@ -72,13 +72,13 @@ type ApiServerServer interface {
 type UnimplementedApiServerServer struct {
 }
 
-func (UnimplementedApiServerServer) Set(context.Context, *SetRequest) (*SetResponse, error) {
+func (UnimplementedApiServerServer) Set(context.Context, *ApiRequest) (*ApiResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Set not implemented")
 }
-func (UnimplementedApiServerServer) Get(context.Context, *GetRequest) (*GetResponse, error) {
+func (UnimplementedApiServerServer) Get(context.Context, *ApiRequest) (*ApiResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
-func (UnimplementedApiServerServer) Del(context.Context, *DelRequest) (*DelResponse, error) {
+func (UnimplementedApiServerServer) Del(context.Context, *ApiRequest) (*ApiResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Del not implemented")
 }
 func (UnimplementedApiServerServer) mustEmbedUnimplementedApiServerServer() {}
@@ -95,7 +95,7 @@ func RegisterApiServerServer(s grpc.ServiceRegistrar, srv ApiServerServer) {
 }
 
 func _ApiServer_Set_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SetRequest)
+	in := new(ApiRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -104,16 +104,16 @@ func _ApiServer_Set_Handler(srv interface{}, ctx context.Context, dec func(inter
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grape.api.v1.confd.ApiServer/Set",
+		FullMethod: "/api.v1.confd.ApiServer/Set",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApiServerServer).Set(ctx, req.(*SetRequest))
+		return srv.(ApiServerServer).Set(ctx, req.(*ApiRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _ApiServer_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetRequest)
+	in := new(ApiRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -122,16 +122,16 @@ func _ApiServer_Get_Handler(srv interface{}, ctx context.Context, dec func(inter
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grape.api.v1.confd.ApiServer/Get",
+		FullMethod: "/api.v1.confd.ApiServer/Get",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApiServerServer).Get(ctx, req.(*GetRequest))
+		return srv.(ApiServerServer).Get(ctx, req.(*ApiRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _ApiServer_Del_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DelRequest)
+	in := new(ApiRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -140,10 +140,10 @@ func _ApiServer_Del_Handler(srv interface{}, ctx context.Context, dec func(inter
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grape.api.v1.confd.ApiServer/Del",
+		FullMethod: "/api.v1.confd.ApiServer/Del",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApiServerServer).Del(ctx, req.(*DelRequest))
+		return srv.(ApiServerServer).Del(ctx, req.(*ApiRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -152,7 +152,7 @@ func _ApiServer_Del_Handler(srv interface{}, ctx context.Context, dec func(inter
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var ApiServer_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "grape.api.v1.confd.ApiServer",
+	ServiceName: "api.v1.confd.ApiServer",
 	HandlerType: (*ApiServerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -169,5 +169,5 @@ var ApiServer_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "grape/api/v1/confd/apiserver.proto",
+	Metadata: "api/v1/confd/controller.proto",
 }

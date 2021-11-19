@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	confdv1 "grape/api/v1/confd"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -17,7 +16,6 @@ const (
 
 type Application struct {
 	runCmd string
-	env    map[string]string
 
 	cmd      *exec.Cmd
 	signKill bool
@@ -32,16 +30,6 @@ func NewApplication(runCmd string) *Application {
 	}
 }
 
-func (app *Application) UpdateEnv(env []*confdv1.EnvConfig) {
-	app.lock.Lock()
-	defer app.lock.Unlock()
-	appEnv := map[string]string{}
-	for _, e := range env {
-		appEnv[e.Key] = e.Value
-	}
-	app.env = appEnv
-}
-
 func (app *Application) Started() bool {
 	return app.cmd != nil
 }
@@ -53,9 +41,6 @@ func (app *Application) CreateCmd(runCmd string) {
 	app.cmd.Stdout = os.Stdout
 	app.cmd.Stderr = os.Stderr
 	app.cmd.Env = os.Environ()
-	for k, v := range app.env {
-		app.cmd.Env = append(app.cmd.Env, k+"="+v)
-	}
 	app.done = make(chan struct{})
 }
 
