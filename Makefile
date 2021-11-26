@@ -1,4 +1,4 @@
-Version = v1.01
+Version = latest
 
 
 # ********************** all **************************
@@ -33,11 +33,11 @@ mwebhook_cert_base64:
 
 # ********************** docker build **************************
 .PHONY: dockerbuild
-dockerbuild: dockerbuild-apiserver dockerbuild-discovery dockerbuild-injector
+dockerbuild: dockerbuild-controller dockerbuild-discovery dockerbuild-injector
 
-.PHONY: dockerbuild-apiserver
-dockerbuild-apiserver:
-	docker build -f docker/Dockerfile.apiserver -t repo.nexttao.com.cn/common/grape-apiserver:${Version} .
+.PHONY: dockerbuild-controller
+dockerbuild-controller:
+	docker build -f docker/Dockerfile.controller -t repo.nexttao.com.cn/common/grape-controller:${Version} .
 
 .PHONY: dockerbuild-discovery
 dockerbuild-discovery:
@@ -49,11 +49,11 @@ dockerbuild-injector:
 
 
 .PHONY: dockerpush
-dockerpush: dockerpush-apiserver dockerpush-discovery dockerpush-injector
+dockerpush: dockerpush-controller dockerpush-discovery dockerpush-injector
 
-.PHONY: dockerpush-apiserver
-dockerpush-apiserver:
-	docker push repo.nexttao.com.cn/common/grape-apiserver:${Version}
+.PHONY: dockerpush-controller
+dockerpush-controller:
+	docker push repo.nexttao.com.cn/common/grape-controller:${Version}
 
 .PHONY: dockerpush-discovery
 dockerpush-discovery:

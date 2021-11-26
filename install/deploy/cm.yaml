@@ -7,7 +7,7 @@ data:
     redis:
       address: :6379
 
-    apiserver:
+    controller:
       address: :15010
 
     injector:

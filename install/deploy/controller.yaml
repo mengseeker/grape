@@ -3,8 +3,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: grape-apiserver
-  name: grape-apiserver
+    app: grape-controller
+  name: grape-controller
   namespace: grape-system
 spec:
   progressDeadlineSeconds: 600
@@ -12,7 +12,7 @@ spec:
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      app: grape-apiserver
+      app: grape-controller
   strategy:
     rollingUpdate:
       maxSurge: 25%
@@ -22,12 +22,12 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        app: grape-apiserver
+        app: grape-controller
     spec:
       containers:
-      - image: repo.nexttao.com.cn/common/grape-apiserver:v1.01
-        imagePullPolicy: IfNotPresent
-        name: grape-apiserver
+      - image: repo.nexttao.com.cn/common/grape-controller:latest
+        imagePullPolicy: Always
+        name: grape-controller
         ports:
         - containerPort: 15010
           name: http
@@ -57,7 +57,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: grape-apiserver
+  name: grape-controller
   namespace: grape-system
 spec:
   ipFamilies:
@@ -69,6 +69,6 @@ spec:
     protocol: TCP
     targetPort: 15010
   selector:
-    app: grape-apiserver
+    app: grape-controller
   sessionAffinity: None
   type: ClusterIP

@@ -25,8 +25,8 @@ spec:
         app: grape-injector
     spec:
       containers:
-      - image: repo.nexttao.com.cn/common/grape-injector:v1.01
-        imagePullPolicy: IfNotPresent
+      - image: repo.nexttao.com.cn/common/grape-injector:latest
+        imagePullPolicy: Always
         name: grape-injector
         ports:
         - containerPort: 8443
