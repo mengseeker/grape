@@ -5,6 +5,8 @@ services:
     - ALLOW_NONE_AUTHENTICATION=yes
     ports:
     - 2379:2379
+    networks:
+      grape:
 
   controller:
     build:
@@ -17,6 +19,8 @@ services:
     command: controller s
     links:
     - etcd
+    networks:
+      grape:
 
   discovery:
     build:
@@ -28,11 +32,21 @@ services:
     - etcd
     ports:
     - 15020:15020
+    networks:
+      grape:
     
   confd:
     build:
       context: .
       dockerfile: docker/Dockerfile.testapp
-    command: confd -a discovery:15020 -p demo/order -g order-demo-v1 -d
+    command: confd -a discovery:15020 -p demo/order -g order-demo-v1 -d -r top
     depends_on:
     - discovery
+    networks:
+      grape:
+
+networks:
+  grape:
+    name: grape
+    # external:
+    #   name: grape
