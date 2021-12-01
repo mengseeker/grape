@@ -39,7 +39,7 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.testapp
-    command: confd -a discovery:15020 -p demo/order -g order-demo-v1 -d -r top
+    command: confd -a discovery:15020 -p demo/order -g order-demo-v1 -d -r 'cat /dev/zero'
     depends_on:
     - discovery
     networks:

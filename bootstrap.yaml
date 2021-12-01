@@ -4,8 +4,10 @@ logging_level: debug
 redis:
   address: :6379
 
-apiserver:
+controller:
   address: :15010
+  cert: install/api_cert.pem
+  cert_key: install/api_cert_key.pem
 
 injector:
   address: :8443

@@ -7,10 +7,15 @@ import (
 	"log"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 func main() {
-	conn, err := grpc.DialContext(context.Background(), ":15010", grpc.WithInsecure())
+	creds, _ := credentials.NewClientTLSFromFile("install/api_cert.pem", "")
+	conn, err := grpc.DialContext(context.Background(),
+		"controller:15010",
+		grpc.WithTransportCredentials(creds),
+	)
 	if err != nil {
 		log.Fatal(err)
 	}

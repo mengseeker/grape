@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 const ()
@@ -46,7 +47,16 @@ func serve() {
 		log.Fatalf("unalble to connect to etcd: %v", err)
 	}
 
-	grpcServer := grpc.NewServer()
+	gops := []grpc.ServerOption{}
+	if viper.GetString("controller.cert") != "" {
+		creds, err := credentials.NewServerTLSFromFile(viper.GetString("controller.cert"), viper.GetString("controller.cert_key"))
+		if err != nil {
+			log.Fatal(err)
+		}
+		gops = append(gops, grpc.Creds(creds))
+	}
+
+	grpcServer := grpc.NewServer(gops...)
 
 	// config apiserver
 	cas := confdserver.NewApiServer(log, ec)
@@ -56,8 +66,9 @@ func serve() {
 	// mesh apiserver
 	// k8s apiserver
 
-	apiAddress := viper.GetString("apiserver.address")
+	apiAddress := viper.GetString("controller.address")
 	lis, err := net.Listen("tcp", apiAddress)
+
 	if err != nil {
 		log.Fatal("unable to listen %s: %v", apiAddress, err)
 	}
@@ -68,7 +79,7 @@ func serve() {
 }
 
 func initConfig() {
-	viper.SetDefault("apiserver.address", "0.0.0.0:15010")
+	viper.SetDefault("controller.address", "0.0.0.0:15010")
 
 	share.InitConfig(cfgFile, log)
 }

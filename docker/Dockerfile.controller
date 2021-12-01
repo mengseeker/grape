@@ -13,4 +13,7 @@ RUN set -eux && sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk
   rm -rf /tmp/ /var/cache/apk/
 COPY --from=build /goworker/controller /usr/local/bin/
 
+COPY install/api_cert.pem /goworker/install/api_cert.pem
+COPY install/api_cert_key.pem /goworker/install/api_cert_key.pem
+
 CMD [ "controller", "s" ]

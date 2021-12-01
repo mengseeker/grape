@@ -23,9 +23,15 @@ generate_src:
 .PHONY: generate_injector_tls
 generate_injector_tls:
 	mkdir -p .build/injector_tls && cd .build/injector_tls &&\
-	sh -x ../../tools/generate_injector_tls.sh
+	sh -x ../../tools/generate_tls.sh grape-injector.grape-system.svc
 	cp .build/injector_tls/cert.pem install/injector_cert.pem
 	cp .build/injector_tls/key.pem install/injector_key.pem
+
+generate_api_tls:
+	mkdir -p .build/api && cd .build/api &&\
+	sh -x ../../tools/generate_tls.sh controller
+	cp .build/api/cert.pem install/api_cert.pem
+	cp .build/api/key.pem install/api_cert_key.pem
 
 .PHONY: mwebhook_cert_base64
 mwebhook_cert_base64:
